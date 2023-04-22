@@ -289,6 +289,40 @@ void  transmitStatic() {
   }
 }
 //-----------------------------------------------------------//
+float readSupplyVoltage() {
+  int sampleCountTotal = 10;
+  float sumReading = 0.0;
+  int sampleCount = 0;
+const float dividerRatio12v = 14.33;
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(A0);
+    sampleCount++;
+    delay(10);
+  }
+  float sensorVoltage = ((float)sumReading / (float) sampleCountTotal * vRef) / 1024.0;
+  float batteryVoltageIn = sensorVoltage * dividerRatio12v;
+
+  return batteryVoltageIn;
+}
+//------------------------------------------------------------//
+float readSensorControl5v() {
+  int sampleCountTotal = 10;
+  float sumReading = 0.0;
+  int sampleCount = 0;
+const float dividerRatio5v = 14.33;
+
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(A1);
+    sampleCount++;
+    delay(10);
+  }
+  float sensorVoltage = ((float)sumReading / (float) sampleCountTotal * vRef) / 1024.0;
+  float controlVoltageIn = sensorVoltage * dividerRatio5v;
+
+  return controlVoltageIn;
+}
+//------------------------------------------------------------//
+
 void showData() {
 
   if (averagedDistance == 0 && i == 0) {
@@ -354,11 +388,11 @@ float calculateDistance() {
     sum = sum + distance;
     return sum;
   }
+  return sum;
 }
 //-----------------------------------------------------------//
 float calcTotalCapacity() {
   const uint16_t numTanks = 2;
-  const float tankRadius = 175.0;  //in cm
   const float tankArea = 962.23; //Area=r*r*pi/100 in cm3
   // total volume = tankArea * height * numTanks /10
 
@@ -368,25 +402,6 @@ float calcTotalCapacity() {
   return totalCapacity;
 }
 //-----------------------------------------------------------//
-float calculateAvailableVolume() {
-  if (i == 0) {
-    float tankCurrentVolume = (calcTotalCapacity() * calculatePercentage(initialDistance)) / 100;
-    return tankCurrentVolume;
-  }
-  else {
-    float tankCurrentVolume = (calcTotalCapacity() * calculatePercentage(averagedDistance)) / 100;
-    return tankCurrentVolume;
-  }
-}
-//-----------------------------------------------------------//
-float calculatePercentage(float averagedDistance) {
-
-  averagedDistance = outOfLimitsCheck(averagedDistance);
-  float percentageLevel = map(averagedDistance, tankHeight, fullSetPoint, 0, 100);
-
-  return percentageLevel;
-}
-//---------------------------------------------------------------------------------
 float outOfLimitsCheck(float averagedDistance) {
 
   if (averagedDistance < fullSetPoint or averagedDistance > tankHeight) {
@@ -399,6 +414,26 @@ float outOfLimitsCheck(float averagedDistance) {
   return averagedDistance;
 }
 //------------------------------------------------------------//
+float calculatePercentage(float averagedDistance) {
+
+  averagedDistance = outOfLimitsCheck(averagedDistance);
+  float percentageLevel = map(averagedDistance, tankHeight, fullSetPoint, 0, 100);
+
+  return percentageLevel;
+}
+//---------------------------------------------------------------------------------
+float calculateAvailableVolume() {
+  if (i == 0) {
+    float tankCurrentVolume = (calcTotalCapacity() * calculatePercentage(initialDistance)) / 100;
+    return tankCurrentVolume;
+  }
+  else {
+    float tankCurrentVolume = (calcTotalCapacity() * calculatePercentage(averagedDistance)) / 100;
+    return tankCurrentVolume;
+  }
+}
+//-----------------------------------------------------------//
+
 float senseTemperature() {
 
   sensors.requestTemperatures(); // Send the command to get temperature readings
@@ -407,81 +442,3 @@ float senseTemperature() {
   return tempReading;
 }
 //------------------------------------------------------------//
-float readSupplyVoltage() {
-  int sampleCountTotal = 10;
-  float sumReading = 0.0;
-  int sampleCount = 0;
-const float dividerRatio12v = 14.33;
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(A0);
-    sampleCount++;
-    delay(10);
-  }
-  float sensorVoltage = ((float)sumReading / (float) sampleCountTotal * vRef) / 1024.0;
-  float batteryVoltageIn = sensorVoltage * dividerRatio12v;
-
-  return batteryVoltageIn;
-}
-//------------------------------------------------------------//
-float readSensorControl5v() {
-  int sampleCountTotal = 10;
-  float sumReading = 0.0;
-  int sampleCount = 0;
-const float dividerRatio5v = 14.33;
-
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(A1);
-    sampleCount++;
-    delay(10);
-  }
-  float sensorVoltage = ((float)sumReading / (float) sampleCountTotal * vRef) / 1024.0;
-  float controlVoltageIn = sensorVoltage * dividerRatio5v;
-
-  return controlVoltageIn;
-}
-//------------------------------------------------------------//
-/*void scanI2C() {
-  Serial.println (F("I2C scanner. Scanning ..."));
-  byte count = 0;
-
-  Wire.begin();
-  for (byte i = 8; i < 127; i++)
-  {
-    Wire.beginTransmission (i);
-
-    if (Wire.endTransmission () == 0)
-    {
-      Serial.print("Found address: ");
-      Serial.print(i, DEC);
-      Serial.print(" (0x");
-      Serial.print(i, HEX);
-      Serial.println (")");
-      if (i == 39) { //address 39 (0x27)
-        Serial.println(F("I2C LCD 16x2 Display Installed."));
-        I2CLCDFound = true;
-      }
-      else {
-        I2CLCDFound = false;
-        Serial.println(F("I2C LCD 16x2 Display Not Installed."));
-      }
-      count++;
-      delay (1);  // maybe unneeded?
-    } // end of good response
-    else if (Wire.endTransmission () == 4)
-    {
-      Serial.print("Unknown error at address 0x");
-      if (i < 16)
-        Serial.print("0");
-      Serial.println(i, HEX);
-    }  // end of error response
-
-  } // end of for loop
-
-  Serial.println();
-  Serial.println ("Done.");
-  Serial.print("Found ");
-  Serial.print(count, DEC);
-  Serial.println (F(" device(s)."));
-  }
-*/
-//-------------------------------------------------------------//
