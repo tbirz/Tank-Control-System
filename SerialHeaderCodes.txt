@@ -1,0 +1,17 @@
+  -----Project Serial Header Codes---------
+  A-rxAvailableCapacity       H-rxTankHeight         O                     V-rxSensorControl5v
+  B-rxBatteryVoltageLevel    I-rxController12v       P-rxPercentageLevel   W
+  C-rxTotalCapacity          J-rxController7v        Q                     X
+  D-rxActualLevel (from Top) K-rxController5v        R-rxRefillSetPoint    Y
+  E                          L-rxController3v3       S                     Z
+  F-rxFullSetPoint           M-rxControllerVacConst  T-rxTemperatureLevel
+  G                          N-rxControllerVacSw     U
+
+  a                h                o-rxOperatingMode      v-rxVacActive
+  b-rxBuzzerActive i                p-rxPumpRunning        w-rxRelay1Position
+  c                j                q                      x-rxRelay2Position
+  d                k                r-rxRadioLinkRunning   y-rxServo1Position
+  e-rxTankEmpty    l-rxTankLevelOk  s-rxServosRunning      z-rxServo2Position
+  f-rxTankFull     m                t-rxTankFilling
+  g                n                u
+  -----------------------------------------
