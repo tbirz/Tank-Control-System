@@ -396,6 +396,7 @@ float outOfLimitsCheck(float averagedDistance) {
   else if (averagedDistance >= fullSetPoint or averagedDistance <= tankHeight) {
     return averagedDistance;;
   }
+  return averagedDistance;
 }
 //------------------------------------------------------------//
 float senseTemperature() {
