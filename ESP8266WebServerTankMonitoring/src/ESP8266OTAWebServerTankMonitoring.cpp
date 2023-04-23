@@ -1,14 +1,29 @@
-#include <Arduino.h>
-#include <Hash.h>  //Hash is used to generate the MD5 hash for the password
-#include <ESP8266WiFi.h> //ESP8266 Core WiFi Library (you most likely already have this in your sketch)
-#include <ESPAsync_WifiManager.h>  //ESPAsync_WifiManager is used to manage the WiFi connection
-#include <AsyncElegantOTA.h> //AsyncElegantOTA is used to manage the OTA updates
+#include <AsyncElegantOTA.h>
+/****************************************************************************************************************************
+  Async_AutoConnect_ESP8266_minimal.ino
+  For ESP8266 / ESP32 boards
+  Built by Khoi Hoang https://github.com/khoih-prog/ESPAsync_WiFiManager
+  Licensed under MIT license
+ *****************************************************************************************************************************/
+#if !(defined(ESP8266))
+#error This code is intended to run on ESP8266 platform! Please check your Tools->Board setting.
+#endif
+#include <ESPAsync_WiFiManager.h> //https://github.com/khoih-prog/ESPAsync_WiFiManager
+AsyncWebServer webServer(80);
+DNSServer dnsServer;
+
 #include <WebSocketsServer.h> //WebSocketsServer is used to manage the websocket connection
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
-#include <ESP8266WebServer.h> 
-ESP8266WebServer server(80); //server is used to manage the web server connection
-
-
+ 
+//Customized home page
+String myHostName = "ESP8266 Tank Monitoring Sytem";
+String myESP8266page = "<a href='/update'>Update Firmware</span></a>";
+String myNotFoundPage = "<h2>Error, page not found! <a href='/'>Go back to main page!</a></h2>";
+ 
+//ESP8266 Access credential
+const char *myUsername = "myUserName";
+const char *myPass = "myPass";
+ 
 int connCount = 0; //connCount is used to count the number of connections to the web server
 int serialSwapped = 0; //serialSwapped is used to indicate that the serial port has been swapped
 int wsConnected = 0; //wsConnected is used to indicate that the websocket has been connected
@@ -63,21 +78,9 @@ char webData[maxBuffer];
 //idxData is the index of the data in the buffer
 byte idxData = 0;
 
-/*
 
 
-IPAddress ip(192, 168, 43, 253); //ESP static ip
-IPAddress gateway(192, 168, 43, 1);   //IP Address of your WiFi Router (Gateway)
-IPAddress subnet(255, 255, 255, 0);  //Subnet mask
-IPAddress dns(8, 8, 8, 8);  //DNS
 
-
-//Enter your Wi-Fi SSID and PASSWORD
-const char* ssid     = "YellowAndBlack";
-const char* password = "tigers2017";
-const char* deviceName = "ESP8266";
-
-*/
 
 // This function returns an HTML formated page in the correct type for display
 // It uses the Raw string macro 'R' to place commands in PROGMEM
@@ -1977,6 +1980,8 @@ window.onload = function(e){
 </html>
 )=====";
 
+
+
 //===================================================================
 // This routine is executed when you open a browser at the IP address
 //===================================================================
@@ -2135,71 +2140,52 @@ void handleWebRequests(){
   Serial.println(msg);
 }
 //------------------------------------------------------------------------//
-//SETUP
-//------------------------------------------------------------------------//
-void setup(void) {
-int idx=0;
-int idxCount=0;
-pinMode(2,OUTPUT);
-  Serial.begin(baud); //tx GPIO1, rx GPIO3 default
-  Serial1.begin(baud); //tx only gpio2 for debugging
-  
-  while (!Serial) {
-; // wait for serial port to connect. Needed for Leonardo only
-}
 
-// WiFiManager
-  // Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
-  
-  // Uncomment and run it once, if you want to erase all the stored information
-  //wifiManager.resetSettings();
-  
-  // set custom ip for portal
-  wifiManager.setAPConfig(IPAddress(192.168.99.252), IPAddress(192.168.99.252), IPAddress(255,255,255,0));
+void setup(void)
+{
+    // put your setup code here, to run once:
 
-  // fetches ssid and pass from eeprom and tries to connect
-  // if it does not connect it starts an access point with the specified name
-  // here  "AutoConnectAP"
-  // and goes into a blocking loop awaiting configuration
-  wifiManager.autoConnect("AutoConnectAP", "password");
-  // or use this for auto generated name ESP + ChipID
-  //wifiManager.autoConnect();
-  // if you get here you have connected to the WiFi
-  Serial.println("Wifi Connected.");
-
-
-
-
-  /*
-    while (WiFi.status() != WL_CONNECTED) { // Wait for WiFi to connect 
-    if (idxCount==250) {
-    Serial.println();
-    Serial.println("Failed to connect to router. Resetting.....");
-    ESP.restart();
+    int idx=0;
+    int idxCount=0;
+    pinMode(2,OUTPUT);
+    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
+    Serial1.begin(baud); //tx only gpio2 for debugging
+    while (!Serial)
+        ;
+    delay(200);
+    Serial.print("\nStarting Async_AutoConnect_ESP8266_minimal on " + String(ARDUINO_BOARD));
+    Serial.println(ESP_ASYNC_WIFIMANAGER_VERSION);
+    ESPAsync_WiFiManager ESPAsync_wifiManager(&webServer, &dnsServer, "ESP8266 Tank Monitoring Sytem");
+    //ESPAsync_wifiManager.resetSettings();   //reset saved settings
+    //ESPAsync_wifiManager.setAPStaticIPConfig(IPAddress(192,168,99,253), IPAddress(192,168,99,1), IPAddress(255,255,255,0));
+    Serial.println("Connect to previously saved AP...");
+    ESPAsync_wifiManager.autoConnect("ESP8266 Tank Monitoring Sytem");
+      if (WiFi.status() == WL_CONNECTED)
+    {
+        Serial.print(F("Connected. Local IP: "));
+        Serial.println(WiFi.localIP());
     }
-    if(idx==50) {
-     Serial.println(); 
-     idx=0;
+    else
+    {
+        Serial.println(ESPAsync_wifiManager.getStatus(WiFi.status()));
+        Serial.println("Can't connect! Enter WiFi config mode...");
+        Serial.println("Restart...");
+        ESP.reset();
     }
-    Serial.print(".");
-    delay(100);
-    idx++;
-    idxCount++;
-    } 
-    idxCount=0;
-    idx=0;   
-    
-  Serial.println();  
-  Serial.println("Connected to: "+String(ssid));
-  Serial.print("Using IP address: ");
-  Serial.println(WiFi.localIP());  //IP address assigned to your ESP 
-  */
-//---------------------------
-  server.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
-  server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI  
-  server.begin();  // Start the webserver
-  Serial.println("HTTP server started");
+     webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
+     webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
+    //webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+     //            { request->send(200, "text/html", myESP8266page); });
+    //webServer.onNotFound([](AsyncWebServerRequest *request)
+     //                    { request->send(404, "text/html", myNotFoundPage); });
+ 
+    AsyncElegantOTA.begin(&webServer, myUsername, myPass); // Start ElegantOTA
+      
+    webServer.begin();
+
+    Serial.println("HTTP server started");
+    Serial.println("FOTA server ready!");
+
 //--------------------------- 
   webSocket.begin();   // start the websocket server
   webSocket.onEvent(webSocketEvent);
@@ -2213,16 +2199,14 @@ pinMode(2,OUTPUT);
   webSocket.enableHeartbeat(15000, 3000, 2); // 15 sec ping, 3 sec pong, 2 fails = disconnect
   
   Serial.println("WebSocket server started.");
-   
- } //end setup
-//------------------------------------------------------------------------//
-//LOOP
-//------------------------------------------------------------------------//
-void loop(void) {
-    WifiClient client = server.available();
-    server.handleClient();  // Keep checking for a client connection
+
+
+
+}//end Setup
+ 
+void loop()
+{
+ webServer.handleClient();  // Keep checking for a client connection
     webSocket.loop();
-    processData(); // rx data from controller tx to webpage via websockets
-
-
-} //end loop
+    processData(); // rx data from controller tx to webpage via websockets   
+}
