@@ -10,8 +10,8 @@
 #endif
 #include <ESPAsync_WiFiManager.h> //https://github.com/khoih-prog/ESPAsync_WiFiManager
 AsyncWebServer webServer(80);
-DNSServer dnsServer;
-
+#include <ESPAsyncDNSServer.h>
+AsyncDNSServer dnsServer;
 #include <WebSocketsServer.h> //WebSocketsServer is used to manage the websocket connection
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
  
@@ -1989,11 +1989,12 @@ void handleRoot() {
   //Display HTML contents
  // String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   digitalWrite(2, 0); //Blinks on board led on page request
-  server.send(200, "text/html",Web_page); //Send web page
+  webServer.send(200, "text/html",Web_page); //Send web page
   digitalWrite(2, 1);
 } 
 //------------------------------------------------------------------------//
 void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) { //for receiving websockets data
+
 
 // Figure out the type of WebSocket event
   switch(type) {
@@ -2012,12 +2013,13 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
     case WStype_TEXT:
       {  
         // since payload is a pointer we need to type cast to char
-        for(int i = 0; i < length; i++) { 
-        wsPayload+=((char)payload[i]);
+       for(int i = 0; i <  maxBuffer; i++) { 
+        wsPayload+= String((char *) &payload[i]);
         }
-        char payload[]="\0";
+       String((char *) &payload)="\0"; //clear payload
+       break;
       }       
-      break;
+    
 	  
 	case WStype_PING:
             // pong will be send automatically
@@ -2127,26 +2129,13 @@ else if (wsDisconnected==1 && connCount==1) {
 }
 }
 //------------------------------------------------------------------------//
-void handleWebRequests(){
-  String msg = "Error 404: WebPage Not Detected\n\n";
-  msg += "URI: ";
-  msg += server.uri();
-  msg += server.args();
-  msg += "\n";
-  for (uint8_t i=0; i<server.args(); i++){
-    msg += " NAME:"+server.argName(i) + "\n VALUE:" + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", msg);
-  Serial.println(msg);
-}
-//------------------------------------------------------------------------//
+
 
 void setup(void)
 {
     // put your setup code here, to run once:
 
-    int idx=0;
-    int idxCount=0;
+  
     pinMode(2,OUTPUT);
     Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
@@ -2172,12 +2161,12 @@ void setup(void)
         Serial.println("Restart...");
         ESP.reset();
     }
-     webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
-     webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
-    //webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-     //            { request->send(200, "text/html", myESP8266page); });
-    //webServer.onNotFound([](AsyncWebServerRequest *request)
-     //                    { request->send(404, "text/html", myNotFoundPage); });
+     //webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
+     //webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
+    webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+                { request->send(200, "text/html", myESP8266page); });
+    webServer.onNotFound([](AsyncWebServerRequest *request)
+                        { request->send(404, "text/html", myNotFoundPage); });
  
     AsyncElegantOTA.begin(&webServer, myUsername, myPass); // Start ElegantOTA
       
@@ -2189,8 +2178,7 @@ void setup(void)
 //--------------------------- 
   webSocket.begin();   // start the websocket server
   webSocket.onEvent(webSocketEvent);
-  
- //webSocket.setReconnectInterval(5000); // try ever 5000 again if connection has failed
+
 
   // start heartbeat (optional)
   // ping server every 10000 ms
@@ -2206,7 +2194,6 @@ void setup(void)
  
 void loop()
 {
- webServer.handleClient();  // Keep checking for a client connection
     webSocket.loop();
     processData(); // rx data from controller tx to webpage via websockets   
 }
