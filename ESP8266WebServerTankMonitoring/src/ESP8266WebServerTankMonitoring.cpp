@@ -1,61 +1,91 @@
 #include <Arduino.h>
-#include <Hash.h>
-#include <ESP8266WiFi.h>
+#include <Hash.h>  //Hash is used to generate the MD5 hash for the password
+#include <ESP8266WiFi.h> //ESP8266 Core WiFi Library (you most likely already have this in your sketch)
+#include <wifiManager.h>  //wifiManager is used to manage the wifi connection
+#include <espSoftwareSerial.h>
 #include <WebSocketsServer.h>
-WebSocketsServer webSocket = WebSocketsServer(81);
-#include <ESP8266WebServer.h>
-ESP8266WebServer server(80);
+WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
+#include <ESP8266WebServer.h> 
+ESP8266WebServer server(80); //server is used to manage the web server connection
 
-int connCount = 0;
-int serialSwapped = 0;
-int wsConnected = 0;
-int wsDisconnected = 0;
-String wsPayload = "";
-String rxTempString = "";
 
-String rxSystemAlarm = "";
-String rxOperatingMode = "";
-String rxAvailableCapacity = "";
-String rxPercentageLevel = "";
-String rxActualLevel = "";
-String rxTemperatureLevel = "";
-String rxTankHeight = "";
-String rxRefillSetPoint = "";
-String rxFullSetPoint = "";
-String rxTotalCapacity = "";
-String rxController12v = "";
-String rxController7v = "";
-String rxController5v = "";
-String rxController3v3 = "";
-String rxControllerVacConst = "";
-String rxControllerVacSw = "";
-String rxBatteryVoltageLevel = "";
-String rxSensorControl5v = "";
-String rxServo1Position = "";
-String rxServo2Position = "";
-String rxRelay1Position = "";
-String rxRelay2Position = "";
-String rxTankEmpty = "";
-String rxTankFull = "";
-String rxTankLevelOk = "";
-String rxPumpRunning = "";
-String rxRadioLinkRunning = "";
-String rxServosRunning = "";
-String rxVacActive = "";
-String rxTankFilling = "";
-String rxBuzzerActive = "";
+int connCount = 0; //connCount is used to count the number of connections to the web server
+int serialSwapped = 0; //serialSwapped is used to indicate that the serial port has been swapped
+int wsConnected = 0; //wsConnected is used to indicate that the websocket has been connected
+int wsDisconnected = 0; //wsDisconnected is used to indicate that the websocket has been disconnected
+String wsPayload = ""; //wsPayload is used to capture the websocket payload
+String rxTempString = "";  //rxTempString used to capture incoming serial data
+String rxSystemAlarm = ""; //rxSystemAlarm is used to capture the system alarm status
+String rxOperatingMode = "";  //rxOperatingMode is used to capture the operating mode
+String rxAvailableCapacity = ""; //rxAvailableCapacity is used to capture the available capacity
+String rxPercentageLevel = "";  //rxPercentageLevel is used to capture the percentage level
+String rxActualLevel = ""; //rxActualLevel is used to capture the actual level
+String rxTemperatureLevel = "";  //rxTemperatureLevel is used to capture the temperature level
+String rxTankHeight = "";  //rxTankHeight is used to capture the tank height
+String rxRefillSetPoint = "";  //rxRefillSetPoint is used to capture the refill set point
+String rxFullSetPoint = "";  //rxFullSetPoint is used to capture the Tank full set point
+String rxTotalCapacity = "";  //rxTotalCapacity is used to capture the total Tank capacity
+String rxController12v = "";  //rxController12v is used to capture the 12v controller status
+String rxController7v = "";  //rxController7v is used to capture the 7v controller status
+String rxController5v = "";  //rxController5v is used to capture the 5v controller status
+String rxController3v3 = "";  //rxController3v3 is used to capture the 3.3v controller status
+String rxControllerVacConst = ""; //rxControllerVacConst is used to capture the Vac controller status
+String rxControllerVacSw = "";  //rxControllerVacSw is used to capture the Vac controller switch status
+String rxBatteryVoltageLevel = "";  //rxBatteryVoltageLevel is used to capture the battery voltage level
+String rxSensorControl5v = "";  //rxSensorControl5v is used to capture the 5v sensor control status
+String rxServo1Position = "";  //rxServo1Position is used to capture the servo 1 position
+String rxServo2Position = "";  //rxServo2Position is used to capture the servo 2 position
+String rxRelay1Position = "";  //rxRelay1Position is used to capture the relay 1 position
+String rxRelay2Position = "";  //rxRelay2Position is used to capture the relay 2 position
+String rxTankEmpty = "";  //rxTankEmpty is used to capture the tank empty status
+String rxTankFull = "";  //rxTankFull is used to capture the tank full status
+String rxTankLevelOk = "";  //rxTankLevelOk is used to capture the tank level ok status
+String rxPumpRunning = "";   //rxPumpRunning is used to capture the pump running status
+String rxRadioLinkRunning = "";  //rxRadioLinkRunning is used to capture the radio link running status
+String rxServosRunning = "";  //rxServosRunning is used to capture the servos running status
+String rxVacActive = "";  //rxVacActive is used to capture the Vac active status
+String rxTankFilling = "";  //rxTankFilling is used to capture the tank filling status
+String rxBuzzerActive = "";  //rxBuzzerActive is used to capture the buzzer active status
 
+//baud rate for the serial port
 long baud = 9600;
+//tmpString is used to capture incoming serial data
 String tmpString = "";
+//count the number of characters received
 unsigned int count = 0;
+//maximum number of characters in the buffer
 const byte maxBuffer = 64;
+//use the buffer to capture incoming serial data
+//define buffer as a static array to avoid stack overflow errors when using dynamic memory allocation (new) 
 static char buffer[maxBuffer];
+//webData is the data that is sent to the web page
 char webData[maxBuffer];
+//idxData is the index of the data in the buffer
 byte idxData = 0;
+
+// WiFiManager
+  // Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  
+  // Uncomment and run it once, if you want to erase all the stored information
+  //wifiManager.resetSettings();
+  
+  // set custom ip for portal
+  wifiManager.setAPConfig(IPAddress(192.168.99.252), IPAddress(192.168.99.252), IPAddress(255,255,255,0));
+
+  // fetches ssid and pass from eeprom and tries to connect
+  // if it does not connect it starts an access point with the specified name
+  // here  "AutoConnectAP"
+  // and goes into a blocking loop awaiting configuration
+  wifiManager.autoConnect("AutoConnectAP", "password");
+  // or use this for auto generated name ESP + ChipID
+  //wifiManager.autoConnect();
+  // if you get here you have connected to the WiFi
+  Serial.println("Wifi Connected.");
 
 /*
 
-//Static IP address configuration for hotspot
+
 IPAddress ip(192, 168, 43, 253); //ESP static ip
 IPAddress gateway(192, 168, 43, 1);   //IP Address of your WiFi Router (Gateway)
 IPAddress subnet(255, 255, 255, 0);  //Subnet mask
@@ -68,20 +98,10 @@ const char* password = "tigers2017";
 const char* deviceName = "ESP8266";
 
 */
-  //Static IP address configuration for home
-  IPAddress ip(192, 168, 99, 253); //ESP static ip
-  IPAddress gateway(192, 168, 99, 1);   //IP Address of your WiFi Router (Gateway)
-  IPAddress subnet(255, 255, 255, 0);  //Subnet mask
-  IPAddress dns(8, 8, 8, 8);  //DNS
-
-  //Enter your Wi-Fi SSID and PASSWORD
-  const char* ssid     = "Tigerland2.4";
-  const char* password = "1980premiers";
-  const char* deviceName = "ESP8266";
 
 // This function returns an HTML formated page in the correct type for display
 // It uses the Raw string macro 'R' to place commands in PROGMEM
-const char Web_page[] PROGMEM = R"=====(
+const char Web_page[] PROGMEM = R"=====(  
 <!DOCTYPE html>
 <html>
 <html lang="en">
@@ -2016,12 +2036,12 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
 	  
 	case WStype_PING:
             // pong will be send automatically
-            serial.printf("[WSc] get ping\n");
+            Serial.printf("[WSc] get ping\n");
             break;
 			
     case WStype_PONG:
             // answer to a ping we send
-            serial.printf("[WSc] get pong\n");
+            Serial.printf("[WSc] get pong\n");
             break; 
 
     // For everything else: do nothing
@@ -2043,8 +2063,9 @@ void processData() {
   byte overflowBuffer=0;
   byte index =0;
   byte idx=0;
-  byte rxData =0;
+  byte rxData=0;
   byte txData=0;
+  String junk="";
   String overflowMsg="Overflow Occured!";
   delay(250);
   Serial.swap(); //to rx GPIO13, tx GPIO15
@@ -2078,7 +2099,7 @@ void processData() {
         overflowBuffer=1;
        }
     }
-       char junk = Serial.read();
+        junk = Serial.read();
     }
     else {
       Serial1.println();
@@ -2190,14 +2211,14 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
 //--------------------------- 
   webSocket.begin();   // start the websocket server
   webSocket.onEvent(webSocketEvent);
- 
- webSocket.setReconnectInterval(5000); // try ever 5000 again if connection has failed
   
+ //webSocket.setReconnectInterval(5000); // try ever 5000 again if connection has failed
+
   // start heartbeat (optional)
   // ping server every 10000 ms
   // expect pong from server within 3000 ms
   // consider connection disconnected if pong is not received 2 times
-  webSocket.enableHeartbeat(10000, 3000, 2); 
+  webSocket.enableHeartbeat(15000, 3000, 2); // 15 sec ping, 3 sec pong, 2 fails = disconnect
   
   Serial.println("WebSocket server started.");
    
