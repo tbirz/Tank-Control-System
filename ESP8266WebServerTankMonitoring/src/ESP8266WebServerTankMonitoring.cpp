@@ -2185,11 +2185,11 @@ void setup(void)
 
 
 
-}//end Setup
+}//end SETUP
  
 void loop()
 {
     WiFiClient client = server.available();   // Listen for incoming clients
     webSocket.loop();
     processData(); // rx data from controller tx to webpage via websockets   
-}
+}//end LOOP
