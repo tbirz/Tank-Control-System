@@ -1,29 +1,14 @@
-#include <AsyncElegantOTA.h>
-/****************************************************************************************************************************
-  Async_AutoConnect_ESP8266_minimal.ino
-  For ESP8266 / ESP32 boards
-  Built by Khoi Hoang https://github.com/khoih-prog/ESPAsync_WiFiManager
-  Licensed under MIT license
- *****************************************************************************************************************************/
-#if !(defined(ESP8266))
-#error This code is intended to run on ESP8266 platform! Please check your Tools->Board setting.
-#endif
-#include <ESPAsync_WiFiManager.h> //https://github.com/khoih-prog/ESPAsync_WiFiManager
-AsyncWebServer webServer(80);
-#include <ESPAsyncDNSServer.h>
-AsyncDNSServer dnsServer;
-#include <WebSocketsServer.h> //WebSocketsServer is used to manage the websocket connection
+#include <Hash.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+ESP8266WebServer webServer(80);
+#include <WifiManager.h>  // https://github.com/tzapu/WiFiManager
+#include <DNSServer.h>
+#include <WebSocketsServer.h>
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
+
  
-//Customized home page
-String myHostName = "ESP8266 Tank Monitoring Sytem";
-String myESP8266page = "<a href='/update'>Update Firmware</span></a>";
-String myNotFoundPage = "<h2>Error, page not found! <a href='/'>Go back to main page!</a></h2>";
- 
-//ESP8266 Access credential
-const char *myUsername = "myUserName";
-const char *myPass = "myPass";
- 
+
 int connCount = 0; //connCount is used to count the number of connections to the web server
 int serialSwapped = 0; //serialSwapped is used to indicate that the serial port has been swapped
 int wsConnected = 0; //wsConnected is used to indicate that the websocket has been connected
@@ -2132,13 +2117,31 @@ else if (wsDisconnected==1 && connCount==1) {
 
 
 void setup(void)
-{
-    // put your setup code here, to run once:
-
-  
+{ 
     pinMode(2,OUTPUT);
-    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
+   Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
+     // WiFiManager
+  // Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  
+  // Uncomment and run it once, if you want to erase all the stored information
+  //wifiManager.resetSettings();
+  
+  // set custom ip for portal
+  //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+
+  // fetches ssid and pass from eeprom and tries to connect
+  // if it does not connect it starts an access point with the specified name
+  // here  "AutoConnectAP"
+  // and goes into a blocking loop awaiting configuration
+  wifiManager.autoConnect("AutoConnectAP");
+  // or use this for auto generated name ESP + ChipID
+  //wifiManager.autoConnect();
+  
+  // if you get here you have connected to the WiFi
+  Serial.println("Connected.");
+ 
     while (!Serial)
         ;
     delay(200);
@@ -2161,19 +2164,11 @@ void setup(void)
         Serial.println("Restart...");
         ESP.reset();
     }
-     //webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
-     //webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
-    webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                { request->send(200, "text/html", myESP8266page); });
-    webServer.onNotFound([](AsyncWebServerRequest *request)
-                        { request->send(404, "text/html", myNotFoundPage); });
- 
-    AsyncElegantOTA.begin(&webServer, myUsername, myPass); // Start ElegantOTA
-      
-    webServer.begin();
+     webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
+     webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
+     webServer.begin();
 
-    Serial.println("HTTP server started");
-    Serial.println("FOTA server ready!");
+     Serial.println("HTTP server started");
 
 //--------------------------- 
   webSocket.begin();   // start the websocket server
@@ -2194,6 +2189,7 @@ void setup(void)
  
 void loop()
 {
+    WiFiClient client = server.available();   // Listen for incoming clients
     webSocket.loop();
     processData(); // rx data from controller tx to webpage via websockets   
 }
