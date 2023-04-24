@@ -1,7 +1,7 @@
 #include <Hash.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-ESP8266WebServer webServer(80);
+ESP8266WebServer server(80);
 #include <WifiManager.h>  // https://github.com/tzapu/WiFiManager
 #include <DNSServer.h>
 #include <WebSocketsServer.h>
@@ -1974,7 +1974,7 @@ void handleRoot() {
   //Display HTML contents
  // String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   digitalWrite(2, 0); //Blinks on board led on page request
-  webServer.send(200, "text/html",Web_page); //Send web page
+  server.send(200, "text/html",Web_page); //Send web page
   digitalWrite(2, 1);
 } 
 //------------------------------------------------------------------------//
@@ -2114,7 +2114,19 @@ else if (wsDisconnected==1 && connCount==1) {
 }
 }
 //------------------------------------------------------------------------//
-
+void handleWebRequests(){
+  String msg = "Error 404: WebPage Not Detected\n\n";
+  msg += "URI: ";
+  msg += server.uri();
+  msg += server.args();
+  msg += "\n";
+  for (uint8_t i=0; i<server.args(); i++){
+    msg += " NAME:"+server.argName(i) + "\n VALUE:" + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", msg);
+  Serial.println(msg);
+}
+//------------------------------------------------------------------------//
 
 void setup(void)
 { 
@@ -2142,31 +2154,12 @@ void setup(void)
   // if you get here you have connected to the WiFi
   Serial.println("Connected.");
  
-    while (!Serial)
-        ;
-    delay(200);
-    Serial.print("\nStarting Async_AutoConnect_ESP8266_minimal on " + String(ARDUINO_BOARD));
-    Serial.println(ESP_ASYNC_WIFIMANAGER_VERSION);
-    ESPAsync_WiFiManager ESPAsync_wifiManager(&webServer, &dnsServer, "ESP8266 Tank Monitoring Sytem");
-    //ESPAsync_wifiManager.resetSettings();   //reset saved settings
-    //ESPAsync_wifiManager.setAPStaticIPConfig(IPAddress(192,168,99,253), IPAddress(192,168,99,1), IPAddress(255,255,255,0));
-    Serial.println("Connect to previously saved AP...");
-    ESPAsync_wifiManager.autoConnect("ESP8266 Tank Monitoring Sytem");
-      if (WiFi.status() == WL_CONNECTED)
-    {
-        Serial.print(F("Connected. Local IP: "));
-        Serial.println(WiFi.localIP());
+    while (!Serial){
+        ; // wait for serial port to connect. Needed for Leonardo only
     }
-    else
-    {
-        Serial.println(ESPAsync_wifiManager.getStatus(WiFi.status()));
-        Serial.println("Can't connect! Enter WiFi config mode...");
-        Serial.println("Restart...");
-        ESP.reset();
-    }
-     webServer.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
-     webServer.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
-     webServer.begin();
+     server.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
+     server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
+     server.begin();
 
      Serial.println("HTTP server started");
 
@@ -2189,7 +2182,7 @@ void setup(void)
  
 void loop()
 {
-    WiFiClient client = server.available();   // Listen for incoming clients
+    server.handleClient();  // Keep checking for a client connection
     webSocket.loop();
     processData(); // rx data from controller tx to webpage via websockets   
 }//end LOOP
