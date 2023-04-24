@@ -7,7 +7,6 @@ ESP8266WebServer server(80);
 #include <WebSocketsServer.h>
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
 
- 
 
 int connCount = 0; //connCount is used to count the number of connections to the web server
 int serialSwapped = 0; //serialSwapped is used to indicate that the serial port has been swapped
@@ -2166,13 +2165,8 @@ void setup(void)
 //--------------------------- 
   webSocket.begin();   // start the websocket server
   webSocket.onEvent(webSocketEvent);
-
-
-  // start heartbeat (optional)
-  // ping server every 10000 ms
-  // expect pong from server within 3000 ms
-  // consider connection disconnected if pong is not received 2 times
   webSocket.enableHeartbeat(15000, 3000, 2); // 15 sec ping, 3 sec pong, 2 fails = disconnect
+ 
   
   Serial.println("WebSocket server started.");
 
