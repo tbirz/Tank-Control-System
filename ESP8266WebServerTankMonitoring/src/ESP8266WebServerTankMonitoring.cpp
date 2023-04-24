@@ -57,7 +57,7 @@ unsigned int count = 0;
 const byte maxBuffer = 64;
 //use the buffer to capture incoming serial data
 //define buffer as a static array to avoid stack overflow errors when using dynamic memory allocation (new) 
-static char buffer[maxBuffer];
+char  buffer[maxBuffer-1];
 //webData is the data that is sent to the web page
 char webData[maxBuffer];
 //idxData is the index of the data in the buffer
