@@ -264,196 +264,124 @@ const char* ledI2CModuleLabels[ledI2CModuleArraySize] = {"Servo Controller", "Da
 //controller Indicators To WebPage
 const uint16_t controllerIndicatorsArraySize = 16;
 const uint16_t controllerVoltagesArraySize = 7;
-char* contIndValue[controllerIndicatorsArraySize];
+String contIndValue[controllerIndicatorsArraySize];
 String contVolValue[controllerVoltagesArraySize];
 // Tank Levels array for page on 'tank page
 const uint16_t tankLevelArraySize = 6;
 const char* tankLevelLabels[tankLevelArraySize] = {">= 0 & < 10%", ">= 10 & < 50%", ">= 50 & < 75%", ">= 75 & < 95%", ">= 95%", "\0"};
-/*****************************************************************************************************************************************/
-//SETUP
-/*****************************************************************************************************************************************/
-void setup() {
 
-  Serial.begin(baud);
-  delay(50);
-
-  Serial.println(F("========================================"));
-  Serial.println(F("PUMP CONTROLLER SERIAL OUTPUT"));
-  Serial.println(F("========================================"));
-
-  /****tft*****/
-
-  pinMode(A0, OUTPUT);       //.kbv mcufriend have RD on A0
-  digitalWrite(A0, HIGH);
-
-  // Setup the tft
-  uint16_t ID = tft.readID();
-  tft.begin(ID);
-  tft.setRotation(Orientation);
-  tft.fillScreen(Black);
-
-  serialSetup();
-
-  showSplash();
-
-  /****Controller*****/
-
-  scanI2C(); //scan for I2C devices (SD/RTC & Servo)
-
-
-  if (rtcSetup() == true ) {
-
-    if (SD.begin(dataLoggerCS)) {
-      Serial.print("Initialising SD card........");// setup for the SD card
-      Serial.println();
-      sdOk = true;
-    }
-    else if (!SD.begin(dataLoggerCS)) {
-      Serial.println();
-      Serial.println(F("Initialisation of SD card....failed!"));
-      Serial.println();
-      sdOk = false;
-      return;
-    }
-    if (sdOk == true) {
-      Serial.println(F("SD Card Initialised.......OK."));
-      Serial.println();
-      dataFile = SD.open(dataFilename, FILE_WRITE); //open/create file
-    }
-    if (SD.exists(dataFilename)) {
-      logFile = true;
-      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" has been found and opened.");
-      Serial.println();
-
-      if (dataFile.size() > 0) {
-        Serial.print("Data Headings have already been written to the file: ") && Serial.println(dataFilename);
-        Serial.println();
-        dataFile.close();
-        Serial.print("File: ") && Serial.print(dataFilename)&& Serial.println(" has been closed");
-        Serial.println();
-      }
-      else {
-        Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is Empty!");
-        Serial.println();
-        if (dataFile) {  // if the file opened ok, write to it:
-          Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is ready for writing to!");
-          Serial.println();
-          Serial.print("Writing data 'Headings' to file: ") && Serial.print(dataFilename) && Serial.println(" .........");
-          Serial.println();
-
-          dataFile.println("Date,Time, Level, % Full, Temperature ºC, +12v, +7v, +5v, +3v3, Sensor Battery, Sensor Control"); // pruint16_t the headings for our data
-
-          Serial.println(F("Date,Time, Level, % Full, Temperature ºC, +12v, +7v, +5v, +3v3, Sensor Battery, Sensor Control"));
-          Serial.println();
-          Serial.print("Writing data to: ") && Serial.print(dataFilename) && Serial.println(" has completed.");
-          dataFile.close();
-        }
-        else {
-          logFile = false;
-          Serial.print("Error! Cannot write to file: ") && Serial.println(dataFilename);
-          Serial.println();
-          dataFile.close();
-        }
-      }
-    }
-    else {
-      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" cannot be found.");
-      Serial.println();
-    }
-  }
-
-
-  // define pwm module inits for servos
-  pwm.begin();
-  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-
-  //define piezo buzzer pin
-  pinMode(piezoBuzzerPin, OUTPUT);
-
-  //define data logging pin modes
-  pinMode(dataLoggerCS, OUTPUT);
-  pinMode(10, OUTPUT);
-
-  //define input pin modes for 28vac voltage sensing
-  pinMode(vacConst, INPUT_PULLUP);
-  pinMode(vacSwitched, INPUT_PULLUP);
-
-  // define pin modes for tx, rx for Serial1 (HC12 radio link)
-
-  pinMode(radioSETPin, OUTPUT);
-  digitalWrite(radioSETPin, HIGH); //LOW for command mode
-
-
-  //define analogue inputs
-  pinMode(analogInputA13, INPUT); // reads 12v Supply
-  pinMode(analogInputA12, INPUT); //reads 7v Supply
-  pinMode(analogInputA11, INPUT); //reads 5v Supply
-  pinMode(analogInputA10, INPUT); //reads 3v (3v3) Supply
-
-
-  //define input pin modes for tank status
-  pinMode(tankLevelOK, OUTPUT);
-  pinMode(tankEmpty, OUTPUT);
-  pinMode(tankFull, OUTPUT);
-  pinMode(tankFilling, OUTPUT);
-  pinMode(pumpRunning, OUTPUT);
-
-  //define input pin modes for relay control
-  pinMode(relay1, OUTPUT);    //28vac Constant
-  pinMode(relay2, OUTPUT);    //28vac Switched
-
-  //define input pin mode for control modes
-  pinMode(modeAuto, INPUT);
-  pinMode(modeManual, INPUT);
-  pinMode(modeAutoLED, OUTPUT);
-  pinMode(modeManualLED, OUTPUT);
-  pinMode(modeBypassLED, OUTPUT);
-  pinMode(vacActiveLED, OUTPUT);
-  pinMode(servosRunningLED, OUTPUT);
-  pinMode(radioLinkOnLED, OUTPUT);
-  pinMode(alarmLED, OUTPUT);
-  pinMode(ledTest, INPUT);
-
-  ledTestCheck();
-
-  do {
-    //Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
-  } while (rxSensorData() == false);
-}
-/*****************************************************************************************************************************************/
-//LOOP
-/*****************************************************************************************************************************************/
-void loop() {
-  if (boolean(initCompleted) == false) {
-    servoChangeFromTank();
-    showMainMenu();
-    initCompleted = true;
-  }
-  buttonPressed();
-  getMode();
-  sendControllerIndicators(contIndValue, controllerIndicatorsArraySize);
-  sendControllerVoltages(contVolValue, controllerVoltagesArraySize);
-  getAlarmStatus();
-
-  rxSensorData();
-
-  drawLEDOperation();
-  if (rxActualLevelOld != rxActualLevel) {
-    drawTankLevel(rxActualLevel);
-    getTankDetails();
-    rxActualLevelOld = rxActualLevel;
-  }
-  showSupplyVoltages();
-  vacVoltageCheck();
-  vacRelayControl();
-  modeControl();
-  servoControl();
-  monStatus();
-
-}
 //----------------- FUNCTIONS---------------------------------------------------//
-//-------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------
+boolean buzzerOperation() {
+  tone(piezoBuzzerPin, 1000, 500);
+  delay(1000);
+  return true;
+}
+//-------------------------------------------------------------//
+float read12v() {
+
+  uint16_t sampleCountTotal = 10;
+  float sumReading = 0;
+  uint16_t sampleCount = 0;
+
+  float dividerRatio12v = 0.0;
+
+  float sensorV12v = 0.0;
+  
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(analogInputA10);
+    sampleCount++;
+    delay(5);
+  }
+  if (!Serial) {
+      dividerRatio12v = 14.2;
+    }    
+   else if (Serial) {
+      dividerRatio12v = 14.0;
+    }
+  //Serial.print("Analogue value12v: ") && Serial.println(sumReading / sampleCountTotal);
+  sensorV12v = (((float(sumReading) / float(sampleCountTotal)) * vPinMax) / 1024.0)* dividerRatio12v;
+  //  Serial.print("Sensor Voltage Out12v: ") && Serial.print(sensorV12v) && Serial.println(" Volts");
+
+
+  dividerRatio12v = 0.0;
+  return sensorV12v;
+}
+//-------------------------------------------------------------//
+float read7v() {
+  uint16_t sampleCountTotal = 10;
+  float sumReading = 0.0;
+  uint16_t sampleCount = 0;
+  float vIn7v = 0.0;
+  //const float dividerRatio7v = 13.22;
+  const float dividerRatio7v = 12.00;
+  float sensorV7v = 0.0;
+
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(analogInputA11);
+    sampleCount++;
+    delay(10);
+  }
+  sensorV7v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
+  //Serial.print("Sensor Voltage Out7v: ") && Serial.print(sensorV7v) && Serial.println(" Volts");
+  vIn7v = sensorV7v * dividerRatio7v;
+
+  return vIn7v;
+}
+//-------------------------------------------------------------//
+float read5v() {
+  uint16_t sampleCountTotal = 10;
+  float sumReading = 0.0;
+  uint16_t sampleCount = 0;
+  float vIn5v = 0.0;
+  const float dividerRatio5v = 13.22;
+  float sensorV5v = 0.0;
+
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(analogInputA12);
+    sampleCount++;
+    delay(10);
+  }
+  sensorV5v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
+  // Serial.print("Sensor Voltage Out5v: ") && Serial.print(sensorV5v) && Serial.println(" Volts");
+  vIn5v = sensorV5v * dividerRatio5v;
+  return vIn5v;
+}
+//-------------------------------------------------------------//
+float read3v() {
+  uint16_t sampleCountTotal = 10;
+  float sumReading = 0.0;
+  uint16_t sampleCount = 0;
+  float vIn3v = 0.0;
+  const float dividerRatio3v = 13.00;
+  float sensorV3v = 0.0;
+
+  while (sampleCount < sampleCountTotal) {
+    sumReading += analogRead(analogInputA13);
+    sampleCount++;
+    delay(10);
+  }
+  sensorV3v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
+  // Serial.print("Sensor Voltage Out3v: ") && Serial.print(sensorV3v) && Serial.println(" Volts");
+  vIn3v = sensorV3v * dividerRatio3v;
+  return vIn3v;
+}
+//-------------------------------------------------------------//
+int voltageOutOfLimits()
+{
+if (((read12v()  < v12vLL) || (read12v()  > v12vUL)) ||
+      ((read7v()  < v7vLL) || (read7v()  > v7vUL)) ||
+      ((read5v()  < v5vLL) || (read5v()  > v5vUL)) ||
+      ((read3v()  < v3vLL) || (read3v()  > v3vUL))) {
+
+        return 1;
+      }
+      //else {
+      //  return 0;
+      //}
+      return 0;
+}
 //-------------------------------------------------------------------------------
 void buttonPressResults(TSPoint p, uint16_t b, uint16_t x, uint16_t y, uint16_t z) {  //Serial readout of x & y co-ords when screen/button is pressed, also finger pressure value
 
@@ -473,21 +401,21 @@ void selectMenuPage(TSPoint p, uint16_t b, uint16_t x, uint16_t y, uint16_t z) {
         buttonPressResults(p, b, p.x, p.y, p.z);
         buttons[b].justReleased();
         buttons[b].drawButton();
-        showSystem();
+        void showSystem();
         break;
       }
     case 1: {
         buttonPressResults(p, b, p.x, p.y, p.z);
         buttons[b].justReleased();
         buttons[b].drawButton();
-        showControl();
+        void showControl();
         break;
       }
     case 2: {
         buttonPressResults(p, b, p.x, p.y, p.z);
         buttons[b].justReleased();
         buttons[b].drawButton();
-        showTank();
+        void showTank();
         break;
       }
   }
@@ -495,7 +423,7 @@ void selectMenuPage(TSPoint p, uint16_t b, uint16_t x, uint16_t y, uint16_t z) {
 //-------------------------------------------------------------------------------
 void buttonPressed() { //getScreenXY()
 
-  uint16_t ID = tft.readID();
+  //uint16_t ID = tft.readID();
   p = ts.getPoint();
   uint16_t b = 0;
 
@@ -564,25 +492,25 @@ void buttonPressed() { //getScreenXY()
       switch (tft.readID()) { //read controller type
         case 0x1581: {
             if (p.y > 240 && p.y < 315 && p.x > 425 && p.x < 520) { //returnBtn
-              returnBtnAction();
+              void returnBtnAction();
               break;
             }
           }
         case 0x9486: {
             if (p.y > 240 && p.y < 315 && p.x > 425 && p.x < 520) { //returnBtn
-              returnBtnAction();
+              void returnBtnAction();
               break;
             }
           }
         case 0x9488: {
             if (p.y > 240 && p.y < 315 && p.x > 425 && p.x < 520) { //returnBtn
-              returnBtnAction();
+              void returnBtnAction();
               break;
             }
           }
         case 0x6814: {
             if (p.x > 280 && p.x < 330 && p.y > 350 && p.y < 450) { //returnBtn
-              returnBtnAction();
+              void returnBtnAction();
               break;
             }
           }
@@ -602,7 +530,7 @@ void returnBtnAction() {  //function to show return button pressed (inverted) & 
   returnBtn.drawButton();
   Serial.print("Return Button: ") && Serial.println(" Pressed & Released = True");  //Serialized confirmation
   tft.fillScreen(Black);
-  showMainMenu();
+  void showMainMenu();
 }
 //--------------------------------------------------------------------------
 void getAlarmStatus() {
@@ -616,10 +544,13 @@ void getAlarmStatus() {
   uint16_t listLines = 1;
   const uint16_t col1Lines = 11;
   uint16_t displayLinesCutOff = 20;
-
+  int voltageOutOfLimitsStatus = 0;
+   voltageOutOfLimitsStatus = voltageOutOfLimits();
+   bool buzzerOperationStatus = false;
+    buzzerOperationStatus = buzzerOperation();
   int msgStatusArray[maxMsgs];
 
-  char * msgArray[] = {"M: Tank is Full. Switch Modes!", "A: Servo Module!", "A: Data Logger!",
+ const char * msgArray[] = {"M: Tank is Full. Switch Modes!", "A: Servo Module!", "A: Data Logger!",
                        "A: Serial Wifi!", "A: Sensor Data!", "A: Tank Full!", "A: Tank Empty!",
                        "A: VAC Supply!", "A: Control Voltage!", "A: Sensor Voltage!",
                        "A: Serial Comms!", "A: SD Card/File!",
@@ -631,7 +562,7 @@ void getAlarmStatus() {
 
   if (digitalRead(modeManual) == LOW && (rxActualLevel <= (rxFullSetPoint + fullOffset))) {
     while (digitalRead(modeManual) == LOW && (rxActualLevel <= (rxFullSetPoint + fullOffset))) {
-      if ( buzzerOperation() == true) {
+      if ( buzzerOperationStatus == true) {
         Serial.println(msgArray[0]);
         msgStatusArray[0] = 1;
         contIndValue[13] = "b1";
@@ -704,7 +635,7 @@ void getAlarmStatus() {
   else {
     msgStatusArray[7] = 0;
   }
-  if (voltageOutOfLimits() == 1) {
+  if (voltageOutOfLimitsStatus == 1) {
     Serial.println(msgArray[8]);
     msgStatusArray[8] = 1;
     msgCount += 1;
@@ -818,6 +749,7 @@ void showTopHeadings() {
   tft.println("Mode:  ");
 }
 //--------------------------------------------------------------------------
+
 void getMode() {
 
   uint16_t xPos = 440;
@@ -1130,7 +1062,7 @@ void drawLEDOperation() { // draw LEDS showing different operating conditions
     }
     //temperature readings
 
-    showTemperature();
+    boolean showTemperature();
   }
   if (currentPage == 1) {
     xPosLed = 42; //vac monitored....................................
@@ -1151,7 +1083,7 @@ void drawLEDOperation() { // draw LEDS showing different operating conditions
       tft.fillCircle(xPosLed, yPosLed, ledLitRadius, Black);
     }
     xPosLed = 165; //dc monitored..............................................
-    getDCVoltageActuals();
+    void getDCVoltageActuals();
     if ((read12v() > v12vLL) && (read12v() < v12vUL)) {
       yPosLed = 45;
       tft.fillCircle(xPosLed, yPosLed, ledLitRadius, LimeGreen);
@@ -1240,27 +1172,27 @@ void showPageTitle() { //shows page titles bottom left corner of screen
 
     case 0: {
         tft.print("Main Menu");
-        //serialShowCurrentPage(currentPage);
+        //void serialShowCurrentPage(currentPage);
         break;
       }
     case 1: {
         tft.print("System Status");
-        serialShowCurrentPage(currentPage);
+        void serialShowCurrentPage(uint16_t currentPage);
         break;
       }
     case 2: {
         tft.print("Control Status");
-        serialShowCurrentPage(currentPage);
+        void serialShowCurrentPage(uint16_t currentPage);
         break;
       }
     case 3: {
         tft.print("Tank Status");
-        serialShowCurrentPage(currentPage);
+        void serialShowCurrentPage(uint16_t currentPage);
         break;
       }
     case 10: {
         tft.print("Splash");
-        serialShowCurrentPage(currentPage);
+        void serialShowCurrentPage(uint16_t currentPage);
         break;
       }
   }
@@ -1295,16 +1227,16 @@ void showMainMenu() {  //Setup Main Menu buttons
       //  Serial.print("  Y: ")&&Serial.pruint16_t(BUTTON_Y + row * (BUTTON_H + BUTTON_SPACING_Y)) && Serial.print("  H: ") && Serial.println(BUTTON_H);
     }
   }
-  buildPageFrame();
-  showPageTitles();
+  void buildPageFrame();
+  void showPageTitles();
 }
 //----------------------------------------------------------------------------------
 void showSplash() {
   currentPage = 10;
 
-  showPageTitle();
-  showTFTDetails();
-  showAbout();
+  void showPageTitle();
+  void showTFTDetails();
+  void showAbout();
   tft.setCursor(200, 280);
   tft.setTextColor(Lime);
   tft.println("Initialising........");
@@ -1330,9 +1262,9 @@ void showAbout() {
 //---------------------------------------------------------------------------------
 void showPageTitles() { //shows info on all pages
 
-  showTopHeadings();
-  showPageTitle();
-  showDTG();
+  void showTopHeadings();
+  void showPageTitle();
+  void showDTG();
 }
 //---------------------------------------------------------------------------------
 void showDTG () { //shows DTG details centre bottom of screen
@@ -1393,22 +1325,22 @@ void showTank() {
   currentPage = 3;
 
   tft.fillScreen(Black);
-  showPageTitles();
-  buildPageFrame();
-  showTankLevelDefinitions();
-  drawTankLevel(rxActualLevel);
-  getTankDetails();
-  returnMainMenu();
+  void showPageTitles();
+  void buildPageFrame();
+  void showTankLevelDefinitions();
+  void drawTankLevel(float rxActualLevel);
+  void getTankDetails();
+  void returnMainMenu();
 }
 //---------------------------------------------------------------------------------
 void showControl() {
   currentPage = 2;
 
   tft.fillScreen(Black);
-  showPageTitles();
-  buildPageFrame();
-  drawLEDSCluster();
-  returnMainMenu();
+  void showPageTitles();
+  void buildPageFrame();
+  void drawLEDSCluster();
+  void returnMainMenu();
 }
 //---------------------------------------------------------------------------------
 void showSystem() {
@@ -1416,10 +1348,10 @@ void showSystem() {
   currentPage = 1;
 
   tft.fillScreen(Black);
-  showPageTitles();
-  buildPageFrame();
-  drawLEDSCluster();
-  returnMainMenu();
+  void showPageTitles();
+  void buildPageFrame();
+  void drawLEDSCluster();
+  void returnMainMenu();
 }
 //---------------------------------------------------------------------------------
 boolean showTemperature() {
@@ -1442,7 +1374,8 @@ boolean showTemperature() {
       tft.print("ERROR!");
       return false;
     }
-    else if (rxTemperatureLevel > tempMin && rxTemperatureLevel <= tempMax ) { //normal operating levels
+    //else if (rxTemperatureLevel > tempMin && rxTemperatureLevel <= tempMax ) { //normal operating levels
+    else { //normal operating levels
       tft.setTextSize(2);
       tft.setCursor(165, 260);
       tft.setTextColor(Yellow, Black);
@@ -1456,179 +1389,65 @@ boolean showTemperature() {
   }
 }
 //---------------------------------------------------------------------------------
-void drawLEDSCluster() {
+void drawLEDArrays(uint16_t Size, uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) {
 
-  uint16_t ArraySize = 0;
+  for (uint16_t idx = 0; idx < Size; idx++) {
 
-  if (currentPage == 2) { //Control Status
-
-    //Setup dividers and header names additional to frame for control page
-    tft.drawLine(150, 10, 150, 308, ForestGreen);
-    tft.drawLine(260, 10, 260, 308, ForestGreen);
-    tft.drawLine(1, 220, 410, 220, ForestGreen);//crossmember
-    tft.drawLine(150, 145, 260, 145, ForestGreen);//crossmember
-    tft.drawLine(410, 10, 410, 308, ForestGreen);
-    tft.setTextSize(2);
-    tft.setTextColor(ForestGreen);
-    tft.setCursor(20, 12);
-    tft.print("Controller");
-    tft.setCursor(165, 12);
-    tft.print("Relays");
-    tft.setCursor(295, 12);
-    tft.print("Voltages");
-    tft.setCursor(292, 225);
-    tft.print("Servos");
-    tft.setCursor(20, 225);
-    tft.print("Mode");
-
-    //Controller LED's
-
-    uint16_t xContTxt = 40;
-    uint16_t yContTxt = 45;
-    uint16_t xContCircle = 20;
-    uint16_t yContCircle = 48;
-    //Serial.println("Controller LED co-ords:Page 2");
-    ArraySize = labelLEDS(ledControlLabels, ledControlArraySize, ledSpacing, xContTxt, yContTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xContCircle, yContCircle);
-
-    //Mode LED's
-
-    uint16_t xModeTxt = 40;
-    uint16_t yModeTxt = 248;
-    uint16_t xModeCircle = 20;
-    uint16_t yModeCircle = 251;
-    //Serial.println("Mode LED co-ords:Page 2");
-    ArraySize = labelLEDS(ledModeLabels, ledModeArraySize, ledSpacing, xModeTxt, yModeTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xModeCircle, yModeCircle);
-
-    // Relay LED's
-
-    uint16_t xRelayControlTxt = 200;
-    uint16_t yRelayControlTxt = 57;
-    uint16_t xRelayTxt = 175;
-    uint16_t yRelayTxt = 42;
-    uint16_t xRelayCircle = 178;
-    uint16_t yRelayCircle = 40;
-
-    tft.setTextSize(1);
-    tft.setTextColor(Orange);
-    tft.setCursor(163, 30);
-    tft.print("Status");
-
-    //Serial.println("Relay LED co-ords: Page 2");
-    ArraySize = labelRelayLEDS(ledRelayLabels, ledRelayArraySize, ledSpacing, xRelayTxt, yRelayTxt);
-    ArraySize = labelRelayControls(ledRelayControlLabels, ledRelayControlArraySize, ledSpacing, xRelayControlTxt, yRelayControlTxt);
-    drawRelayLEDArrays(ledSpacing, xRelayCircle, yRelayCircle);
-
-    //Servo LED's
-    uint16_t xServoTxt = 312.5;
-    uint16_t yServoTxt = 270;
-
-    //Vertical Servo
-    uint16_t xServoCircle1 = 290;
-    uint16_t yServoCircle1 = 273;
-    //Horizontal Servo
-    uint16_t xServoCircle2 = 370;
-    uint16_t yServoCircle2 = 273;
-
-    tft.setTextSize(1);
-    tft.setTextColor(LightSalmon);
-    //tft.setCursor(270, 215);
-    tft.setCursor(270, 253);
-    tft.print("Vertical");
-    // tft.setCursor(345, 215);
-    tft.setCursor(345, 253);
-    tft.print("Horizontal");
-
-    //Serial.println("Servo Vertical & Horizontal LED co-ords: Page 2");
-    ArraySize = labelLEDS(ledServoLabels, ledServoArraySize, ledSpacing, xServoTxt, yServoTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xServoCircle1, yServoCircle1); //Vertical
-    drawLEDArrays(ArraySize, ledSpacing, xServoCircle2, yServoCircle2);  //Horizontal
-
-    //Voltage LED's
-
-    uint16_t xACVoltageTxt = 312.5;
-    uint16_t yACVoltageTxt = 45;
-    uint16_t xACVoltageCircle = 290;
-    uint16_t yACVoltageCircle = 48;
-    uint16_t xDCVoltageTxt = 312.5;
-    uint16_t yDCVoltageTxt = 102;
-    uint16_t xDCVoltageCircle = 290;
-    uint16_t yDCVoltageCircle = 105;
-
-    tft.setTextColor(LightSalmon);
-    tft.setCursor(270, 30);
-    tft.print("AC Supply");
-    tft.setCursor(270, 85);
-    tft.print("DC Control");
-    //Serial.println("AC VOltage LED co-ords:Page 2");
-    ArraySize = labelLEDS(ledACVoltageLabels, ledACVoltageArraySize, ledSpacing, xACVoltageTxt, yACVoltageTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xACVoltageCircle, yACVoltageCircle);
-    //Serial.println("DC VOltage LED co-ords:Page 2");
-    ArraySize = labelLEDS(ledDCVoltageLabels, ledDCVoltageArraySize, ledSpacing, xDCVoltageTxt, yDCVoltageTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xDCVoltageCircle, yDCVoltageCircle);
-
-    //Temperature Display
-
-    showTemperature();
-
-    //Tank Display
-    drawTankLevel(rxActualLevel);
+    if (idx == Size - 1) {
+      break;
+    }
+    tft.drawCircle(xPosCirc, yPosCirc, ledRadius, White);
+    yPosCirc = yPosCirc + spacing;
+    // Serial.print(idx) && Serial.print(". ") && Serial.print(xPosCirc) && Serial.print(",") &&  Serial.println(yPosCirc);
   }
-  else if (currentPage == 1) { // System, Module Status
+}
+//---------------------------------------------------------------------------------
+uint16_t labelLEDS(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
 
-    //Setup dividers and headings additional to frame for page 1
-    tft.drawLine(160, 160, 160, 160, ForestGreen);
-    tft.drawLine(300, 10, 300, 160, ForestGreen);
-    tft.drawLine(1, 160, 479, 160, ForestGreen);
-    tft.setTextSize(2);
-    tft.setTextColor(ForestGreen);
-    tft.setCursor(20, 15);
-    tft.print("Voltages");
-    tft.setCursor(20, 165);
-    tft.print("System Status");
-    tft.setCursor (310, 15);
-    tft.print("Modules");
-
-    //Voltage LED's
-
-    uint16_t xACVoltageTxt = 57;
-    uint16_t yACVoltageTxt = 63;
-    uint16_t xACVoltageCircle = 42;
-    uint16_t yACVoltageCircle = 65;
-
-    uint16_t xDCVoltageTxt = 185;
-    uint16_t yDCVoltageTxt = 43;
-    uint16_t xDCVoltageCircle = 165;
-    uint16_t yDCVoltageCircle = 45;
-
+  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
     tft.setTextSize(1);
-    tft.setTextColor(LightSalmon);
-    tft.setCursor(20, 43);
-    tft.print("AC Supply");
-    tft.setCursor(152, 25);
-    tft.print("DC Control");
-    //Serial.println("AC VOltage LED co-ords: Page 1");
-    ArraySize = labelLEDS(ledACVoltageLabels, ledACVoltageArraySize, ledSpacing, xACVoltageTxt, yACVoltageTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xACVoltageCircle, yACVoltageCircle);
-    //Serial.println("DC VOltage LED co-ords: Page 1");
-    ArraySize = labelLEDS(ledDCVoltageLabels, ledDCVoltageArraySize, ledSpacing, xDCVoltageTxt, yDCVoltageTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xDCVoltageCircle, yDCVoltageCircle);
-    getDCVoltageActuals();
-    
-    // I2C Module Status
+    tft.setTextColor(LightSteelBlue);
+    tft.setCursor(xPosT, yPosT);
+    yPosT = yPosT + spacing;
+    if (strcmp(arrayName[idx],"Sensor+12v")|| strcmp(arrayName[idx],"Sensor+5v")) { //make sensor voltages orange in color
+      tft.setTextColor(Orange);
+    }
+    tft.print(arrayName[idx]);
+    // Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
+  }
+  return arraySize;
+}
+//---------------------------------------------------------------------------------
+uint16_t labelRelayLEDS(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
 
-    uint16_t xI2CModuleTxt = 345;
-    uint16_t yI2CModuleTxt = 63;
-    uint16_t xI2CModuleCircle = 325;
-    uint16_t yI2CModuleCircle = 65;
+  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
+    tft.setTextSize(1);
+    tft.setTextColor(LightSteelBlue);
+    tft.setCursor(xPosT, yPosT);
+    yPosT = yPosT + spacing + 30;
 
-    tft.setTextColor(LightSalmon);
-    tft.setCursor(310, 43);
-    tft.print("Status");
+    tft.print(arrayName[idx]);
+    //Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
+  }
+  return arraySize;
+}
+//---------------------------------------------------------------------------------
+void drawRelayLEDArrays(uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) {
 
-    ArraySize = labelLEDS(ledI2CModuleLabels, ledI2CModuleArraySize, ledSpacing, xI2CModuleTxt, yI2CModuleTxt);
-    drawLEDArrays(ArraySize, ledSpacing, xI2CModuleCircle, yI2CModuleCircle);
+  uint16_t Size = 5;
+  uint16_t idxCount = 0;
+
+  for (uint16_t idx = 0; idx < Size - 1; idx++) {
+    idxCount += 1;
+    if (idxCount == 3) {
+      yPosCirc = yPosCirc + spacing + 10;
+    }
+    else {
+      yPosCirc = yPosCirc + spacing;
+    }
+    tft.drawCircle(xPosCirc, yPosCirc, ledRadius, White);
+
+    // Serial.print(idx) && Serial.print(". ") && Serial.print(xPosCirc) && Serial.print(",") &&  Serial.println(yPosCirc);
   }
 }
 //---------------------------------------------------------------------------------
@@ -1683,15 +1502,210 @@ void drawTankLevelArrays(uint16_t Size, uint16_t spacing, uint16_t xPosRect, uin
 //---------------------------------------------------------------------------------
 void showTankLevelDefinitions() {
 
-  uint16_t ArraySize = 0;
   uint16_t tankLevelSpacing = -40;
   uint16_t xPosT = 200;
   uint16_t yPosT = 230;
   uint16_t xPosRect = 165;
   uint16_t yPosRect = 225;
 
-  ArraySize = labelTankLevels(tankLevelLabels, tankLevelArraySize, tankLevelSpacing, xPosT, yPosT);
-  drawTankLevelArrays(ArraySize, tankLevelSpacing, xPosRect, yPosRect);
+   uint16_t ArraySize = labelTankLevels(tankLevelLabels, tankLevelArraySize, tankLevelSpacing, xPosT, yPosT);
+  void drawTankLevelArrays(uint16_t ArraySize, uint16_t tankLevelSpacing, uint16_t xPosRect, uint16_t yPosRect);
+}
+//---------------------------------------------------------------------------------
+uint16_t labelRelayControls(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
+  spacing = 20;
+  uint16_t idxCount = 0;
+  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
+    idxCount += 1;
+    tft.setTextSize(1);
+    tft.setTextColor(LightSalmon);
+    tft.setCursor(xPosT, yPosT);
+    if (idxCount == 2) {
+      yPosT = yPosT + spacing + 10;
+    }
+    else {
+      yPosT = yPosT + spacing;
+    }
+    tft.print(arrayName[idx]);
+    // Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
+  }
+  return arraySize;
+}
+//---------------------------------------------------------------------------------
+void drawLEDSCluster() {
+
+  uint16_t ArraySize = 0;
+
+  if (currentPage == 2) { //Control Status
+
+    //Setup dividers and header names additional to frame for control page
+    tft.drawLine(150, 10, 150, 308, ForestGreen);
+    tft.drawLine(260, 10, 260, 308, ForestGreen);
+    tft.drawLine(1, 220, 410, 220, ForestGreen);//crossmember
+    tft.drawLine(150, 145, 260, 145, ForestGreen);//crossmember
+    tft.drawLine(410, 10, 410, 308, ForestGreen);
+    tft.setTextSize(2);
+    tft.setTextColor(ForestGreen);
+    tft.setCursor(20, 12);
+    tft.print("Controller");
+    tft.setCursor(165, 12);
+    tft.print("Relays");
+    tft.setCursor(295, 12);
+    tft.print("Voltages");
+    tft.setCursor(292, 225);
+    tft.print("Servos");
+    tft.setCursor(20, 225);
+    tft.print("Mode");
+
+    //Controller LED's
+
+    uint16_t xContTxt = 40;
+    uint16_t yContTxt = 45;
+    uint16_t xContCircle = 20;
+    uint16_t yContCircle = 48;
+    //Serial.println("Controller LED co-ords:Page 2");
+    ArraySize = labelLEDS(ledControlLabels, ledControlArraySize, ledSpacing, xContTxt, yContTxt);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xContCircle, uint16_t yContCircle);
+
+    //Mode LED's
+
+    uint16_t xModeTxt = 40;
+    uint16_t yModeTxt = 248;
+    uint16_t xModeCircle = 20;
+    uint16_t yModeCircle = 251;
+    //Serial.println("Mode LED co-ords:Page 2");
+    ArraySize = labelLEDS(ledModeLabels, ledModeArraySize, ledSpacing, xModeTxt, yModeTxt);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xModeCircle, uint16_t yModeCircle);
+
+    // Relay LED's
+
+    uint16_t xRelayControlTxt = 200;
+    uint16_t yRelayControlTxt = 57;
+    uint16_t xRelayTxt = 175;
+    uint16_t yRelayTxt = 42;
+    uint16_t xRelayCircle = 178;
+    uint16_t yRelayCircle = 40;
+
+    tft.setTextSize(1);
+    tft.setTextColor(Orange);
+    tft.setCursor(163, 30);
+    tft.print("Status");
+
+    //Serial.println("Relay LED co-ords: Page 2");
+    ArraySize = labelRelayLEDS(ledRelayLabels, ledRelayArraySize, ledSpacing, xRelayTxt, yRelayTxt);
+    ArraySize = labelRelayControls(ledRelayControlLabels, ledRelayControlArraySize, ledSpacing, xRelayControlTxt, yRelayControlTxt);
+    void drawRelayLEDArrays(const uint16_t ledSpacing, uint16_t xRelayCircle, uint16_t yRelayCircle);
+
+    //Servo LED's
+    uint16_t xServoTxt = 312.5;
+    uint16_t yServoTxt = 270;
+
+    //Vertical Servo
+    uint16_t xServoCircle1 = 290;
+    uint16_t yServoCircle1 = 273;
+    //Horizontal Servo
+    uint16_t xServoCircle2 = 370;
+    uint16_t yServoCircle2 = 273;
+
+    tft.setTextSize(1);
+    tft.setTextColor(LightSalmon);
+    //tft.setCursor(270, 215);
+    tft.setCursor(270, 253);
+    tft.print("Vertical");
+    // tft.setCursor(345, 215);
+    tft.setCursor(345, 253);
+    tft.print("Horizontal");
+
+    //Serial.println("Servo Vertical & Horizontal LED co-ords: Page 2");
+    ArraySize = labelLEDS(ledServoLabels, ledServoArraySize, ledSpacing, xServoTxt, yServoTxt);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xServoCircle1, uint16_t yServoCircle1); //Vertical
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xServoCircle2, uint16_t yServoCircle2);  //Horizontal
+
+    //Voltage LED's
+
+    uint16_t xACVoltageTxt = 312.5;
+    uint16_t yACVoltageTxt = 45;
+    uint16_t xACVoltageCircle = 290;
+    uint16_t yACVoltageCircle = 48;
+    uint16_t xDCVoltageTxt = 312.5;
+    uint16_t yDCVoltageTxt = 102;
+    uint16_t xDCVoltageCircle = 290;
+    uint16_t yDCVoltageCircle = 105;
+
+    tft.setTextColor(LightSalmon);
+    tft.setCursor(270, 30);
+    tft.print("AC Supply");
+    tft.setCursor(270, 85);
+    tft.print("DC Control");
+    //Serial.println("AC VOltage LED co-ords:Page 2");
+    ArraySize = labelLEDS(ledACVoltageLabels, ledACVoltageArraySize, ledSpacing, xACVoltageTxt, yACVoltageTxt);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xACVoltageCircle, uint16_t yACVoltageCircle);
+    //Serial.println("DC VOltage LED co-ords:Page 2");
+    ArraySize = labelLEDS(ledDCVoltageLabels, ledDCVoltageArraySize, ledSpacing, xDCVoltageTxt, yDCVoltageTxt);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xDCVoltageCircle, uint16_t yDCVoltageCircle);
+
+    //Temperature Display
+
+    boolean showTemperature();
+
+    //Tank Display
+    void drawTankLevel(float rxActualLevel);
+  }
+  else if (currentPage == 1) { // System, Module Status
+
+    //Setup dividers and headings additional to frame for page 1
+    tft.drawLine(160, 160, 160, 160, ForestGreen);
+    tft.drawLine(300, 10, 300, 160, ForestGreen);
+    tft.drawLine(1, 160, 479, 160, ForestGreen);
+    tft.setTextSize(2);
+    tft.setTextColor(ForestGreen);
+    tft.setCursor(20, 15);
+    tft.print("Voltages");
+    tft.setCursor(20, 165);
+    tft.print("System Status");
+    tft.setCursor (310, 15);
+    tft.print("Modules");
+
+    //Voltage LED's
+
+    uint16_t xACVoltageTxt = 57;
+    uint16_t yACVoltageTxt = 63;
+    uint16_t xACVoltageCircle = 42;
+    uint16_t yACVoltageCircle = 65;
+
+    uint16_t xDCVoltageTxt = 185;
+    uint16_t yDCVoltageTxt = 43;
+    uint16_t xDCVoltageCircle = 165;
+    uint16_t yDCVoltageCircle = 45;
+
+    tft.setTextSize(1);
+    tft.setTextColor(LightSalmon);
+    tft.setCursor(20, 43);
+    tft.print("AC Supply");
+    tft.setCursor(152, 25);
+    tft.print("DC Control");
+    //Serial.println("AC VOltage LED co-ords: Page 1");
+    ArraySize = labelLEDS(ledACVoltageLabels, ledACVoltageArraySize, ledSpacing, xACVoltageTxt, yACVoltageTxt);
+    drawLEDArrays(ArraySize, ledSpacing, xACVoltageCircle, yACVoltageCircle);
+    //Serial.println("DC VOltage LED co-ords: Page 1");
+    ArraySize = labelLEDS(ledDCVoltageLabels, ledDCVoltageArraySize, ledSpacing, xDCVoltageTxt, yDCVoltageTxt);
+    drawLEDArrays(ArraySize, ledSpacing, xDCVoltageCircle, yDCVoltageCircle);
+    void getDCVoltageActuals();
+    
+    // I2C Module Status
+
+    uint16_t xI2CModuleTxt = 345;
+    uint16_t yI2CModuleTxt = 63;
+    uint16_t xI2CModuleCircle = 325;
+    uint16_t yI2CModuleCircle = 65;
+
+    tft.setTextColor(LightSalmon);
+    tft.setCursor(310, 43);
+    tft.print("Status");
+
+    ArraySize = labelLEDS(ledI2CModuleLabels, ledI2CModuleArraySize, ledSpacing, xI2CModuleTxt, yI2CModuleTxt);
+    drawLEDArrays(ArraySize, ledSpacing, xI2CModuleCircle, yI2CModuleCircle);
+  }
 }
 //---------------------------------------------------------------------------------
 void buildPageFrame() {
@@ -1801,6 +1815,7 @@ float outOfLimitsCheckActual(float rxActualLevel) {
   else if (rxActualLevel >= rxFullSetPoint && rxActualLevel <= rxTankHeight) {
     return rxActualLevel;
   }
+  return rxActualLevel;
 }
 //---------------------------------------------------------------------------------
 float outOfLimitsCheckPercentage(float rxPercentageLevel) {
@@ -1816,6 +1831,15 @@ float outOfLimitsCheckPercentage(float rxPercentageLevel) {
   else if (rxPercentageLevel >= 0 && rxPercentageLevel <= 100) {
     return rxPercentageLevel;
   }
+  return rxPercentageLevel;
+}
+//---------------------------------------------------------------------------------
+float mapTankLevelPtr(float rxPercentageLevel, uint16_t yPosRectStart, uint16_t rectHeight) {
+
+  float tankLevelPtr = map(rxPercentageLevel, 0, 100, yPosRectStart, yPosRectStart - rectHeight);
+
+  // Serial.print("tank ptr: ") && Serial.println(tankLevelPtr);
+  return tankLevelPtr;
 }
 //---------------------------------------------------------------------------------
 void drawTankLevel(float rxActualLevel) {
@@ -1825,8 +1849,9 @@ void drawTankLevel(float rxActualLevel) {
     uint16_t yPosRectStart = 245;
     uint16_t rectWidth = 100;
     uint16_t rectHeight = -180;
-    uint16_t txtSpace = 0;
-    float tankLevelPtr = 0.0;
+    uint16_t txtSpacePage3 = 0.0;
+    
+   float tankLevelPtrPage3 = 0.0;
 
     //Setup dividers and headings additional to frame for tank page
     tft.drawLine(140, 10, 140, 308, ForestGreen);
@@ -1847,10 +1872,10 @@ void drawTankLevel(float rxActualLevel) {
     tft.setCursor(55, 260);
     tft.print("Empty");
 
-    tankLevelPtr = mapTankLevelPtr(rxPercentageLevel, yPosRectStart, rectHeight);
+    tankLevelPtrPage3 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
     //Serial.println("Tank Sections co-ords: Page 1");
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);  //tank
-    updateTankLevel (rxPercentageLevel, xPosRectStart, yPosRectStart, rectWidth, tankLevelPtr, txtSpace);
+    void updateTankLevel (float rxPercentageLevel, uint16_t  xPosRectStart, uint16_t  yPosRectStart, uint16_t  rectWidth, float tankLevelPtrPage3, uint16_t txtSpacePage3);
   }
 
   else if (currentPage == 2) { //control page
@@ -1858,8 +1883,8 @@ void drawTankLevel(float rxActualLevel) {
     uint16_t yPosRectStart = 220;
     uint16_t rectWidth = 50;
     uint16_t rectHeight = -150;
-    uint16_t txtSpace = 0;
-    float tankLevelPtr = 0.0;
+    uint16_t txtSpacePage2 = 0.0;
+    float tankLevelPtrPage2 = 0.0;
 
     //Setup dividers and headings additional to frame for control page
     tft.setTextSize(2);
@@ -1874,12 +1899,26 @@ void drawTankLevel(float rxActualLevel) {
     tft.setCursor(428, 235);
     tft.print("Empty");
 
-    tankLevelPtr = mapTankLevelPtr(rxPercentageLevel, yPosRectStart, rectHeight);
+    tankLevelPtrPage2 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);
-    updateTankLevel (rxPercentageLevel, xPosRectStart, yPosRectStart, rectWidth, tankLevelPtr, txtSpace);
+   void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t yPosRectStart, uint16_t rectWidth, float tankLevelPtrPage2, uint16_t txtSpacePage2);
   }
 }
 //----------------------------------------------------------------------
+float calcTotalCapacity() {
+
+  float totalCapacity = ((tankArea * (rxTankHeight - rxFullSetPoint)) * numTanks) / 10;
+
+  //Serial.print("Total Capacity: ") && Serial.println(totalCapacity);
+  return totalCapacity;
+}
+//---------------------------------------------------------------------------------
+float calcTankVolume() {
+
+  float tankCurrentVolume = (calcTotalCapacity() * rxPercentageLevel) / 100;
+  return tankCurrentVolume;
+}
+//---------------------------------------------------------------------------------
 void getTankDetails() {
 
   if (currentPage == 3) { //tankPage
@@ -1958,26 +1997,26 @@ void getTankDetails() {
     }
     else if (rxPercentageLevel > 0 && rxPercentageLevel < 10) {
       //  tft.setTextColor(Red, Black);
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
     else if (rxPercentageLevel >= 10 && rxPercentageLevel < 50) {
       // tft.setTextColor(Orange, Black);
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
     else if (rxPercentageLevel >= 50 && rxPercentageLevel < 75) {
       //  tft.setTextColor(Yellow, Black);
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
     else if  (rxPercentageLevel >= 75 &&  rxPercentageLevel < 95) {
       // tft.setTextColor(Green, Black);
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
     else if (rxPercentageLevel > 95) {
       // tft.setTextColor(Blue, Black);
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
     else {
-      tft.print(calcTankVolume())&& tft.print("L");
+      tft.print(calcTankVolume()) && tft.print("L");
     }
 
     //displays percentage value of water available
@@ -1996,45 +2035,10 @@ void getTankDetails() {
       tft.print(rxPercentageLevel)&& tft.println("%");
     }
   }
-  getAlarmStatus();
+  void getAlarmStatus();
 }
 //---------------------------------------------------------------------------------
-int voltageOutOfLimits()
-{
-if (((read12v()  < v12vLL) || (read12v()  > v12vUL)) ||
-      ((read7v()  < v7vLL) || (read7v()  > v7vUL)) ||
-      ((read5v()  < v5vLL) || (read5v()  > v5vUL)) ||
-      ((read3v()  < v3vLL) || (read3v()  > v3vUL))) {
 
-        return 1;
-      }
-      else {
-        return 0;
-      }
-}
-//---------------------------------------------------------------------------------
-float calcTotalCapacity() {
-
-  float totalCapacity = ((tankArea * (rxTankHeight - rxFullSetPoint)) * numTanks) / 10;
-
-  //Serial.print("Total Capacity: ") && Serial.println(totalCapacity);
-  return totalCapacity;
-}
-//---------------------------------------------------------------------------------
-float calcTankVolume() {
-
-  float tankCurrentVolume = (calcTotalCapacity() * rxPercentageLevel) / 100;
-  return tankCurrentVolume;
-}
-//---------------------------------------------------------------------------------
-float mapTankLevelPtr(float rxPercentageLevel, uint16_t yPosRectStart, uint16_t rectHeight) {
-
-  float tankLevelPtr = map(rxPercentageLevel, 0, 100, yPosRectStart, yPosRectStart - rectHeight);
-
-  // Serial.print("tank ptr: ") && Serial.println(tankLevelPtr);
-  return tankLevelPtr;
-}
-//---------------------------------------------------------------------------------
 void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t yPosRectStart, uint16_t rectWidth, float ptr, uint16_t txtSpace) {
 
   if (currentPage == 3) { //tank page
@@ -2123,88 +2127,6 @@ void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t 
     tft.setTextColor(LightSalmon);
   }
   tft.print(rxPercentageLevel)&& tft.print("%");
-}
-//---------------------------------------------------------------------------------
-void drawLEDArrays(uint16_t Size, uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) {
-
-  for (uint16_t idx = 0; idx < Size; idx++) {
-
-    if (idx == Size - 1) {
-      break;
-    }
-    tft.drawCircle(xPosCirc, yPosCirc, ledRadius, White);
-    yPosCirc = yPosCirc + spacing;
-    // Serial.print(idx) && Serial.print(". ") && Serial.print(xPosCirc) && Serial.print(",") &&  Serial.println(yPosCirc);
-  }
-}
-//---------------------------------------------------------------------------------
-uint16_t labelLEDS(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
-
-  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
-    tft.setTextSize(1);
-    tft.setTextColor(LightSteelBlue);
-    tft.setCursor(xPosT, yPosT);
-    yPosT = yPosT + spacing;
-    if (arrayName[idx] == "Sensor+12v" || arrayName[idx] == "Sensor+5v") { //make sensor voltages orange in color
-      tft.setTextColor(Orange);
-    }
-    tft.print(arrayName[idx]);
-    // Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
-  }
-  return arraySize;
-}
-//---------------------------------------------------------------------------------
-uint16_t labelRelayLEDS(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
-
-  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
-    tft.setTextSize(1);
-    tft.setTextColor(LightSteelBlue);
-    tft.setCursor(xPosT, yPosT);
-    yPosT = yPosT + spacing + 30;
-
-    tft.print(arrayName[idx]);
-    //Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
-  }
-  return arraySize;
-}
-//---------------------------------------------------------------------------------
-void drawRelayLEDArrays(uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) {
-
-  uint16_t Size = 5;
-  uint16_t idxCount = 0;
-
-  for (uint16_t idx = 0; idx < Size - 1; idx++) {
-    idxCount += 1;
-    if (idxCount == 3) {
-      yPosCirc = yPosCirc + spacing + 10;
-    }
-    else {
-      yPosCirc = yPosCirc + spacing;
-    }
-    tft.drawCircle(xPosCirc, yPosCirc, ledRadius, White);
-
-    // Serial.print(idx) && Serial.print(". ") && Serial.print(xPosCirc) && Serial.print(",") &&  Serial.println(yPosCirc);
-  }
-}
-//---------------------------------------------------------------------------------
-uint16_t labelRelayControls(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
-  spacing = 20;
-  uint16_t idxCount = 0;
-  for (uint16_t idx = 0; idx < arraySize - 1; idx++) {
-    idxCount += 1;
-    tft.setTextSize(1);
-    tft.setTextColor(LightSalmon);
-    tft.setCursor(xPosT, yPosT);
-    if (idxCount == 2) {
-      yPosT = yPosT + spacing + 10;
-    }
-    else {
-      yPosT = yPosT + spacing;
-    }
-    tft.print(arrayName[idx]);
-    // Serial.print(idx) && Serial.print(". ") && Serial.println(arrayName[idx]);
-  }
-  return arraySize;
 }
 //---------------------------------------------------------------------------------
 void returnMainMenu() {  // Return Button to main menu
@@ -2383,95 +2305,6 @@ void logData(float rxActualLevel, float rxPercentageLevel, float rxTemperatureLe
   }
 }
 //-------------------------------------------------------------//
-float read12v() {
-
-  uint16_t sampleCountTotal = 10;
-  float sumReading = 0;
-  uint16_t sampleCount = 0;
-
-  float dividerRatio12v = 0.0;
-
-  float sensorV12v = 0.0;
-  
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(analogInputA10);
-    sampleCount++;
-    delay(5);
-  }
-  if (!Serial) {
-      dividerRatio12v = 14.2;
-    }    
-   else if (Serial) {
-      dividerRatio12v = 14.0;
-    }
-  //Serial.print("Analogue value12v: ") && Serial.println(sumReading / sampleCountTotal);
-  sensorV12v = (((float(sumReading) / float(sampleCountTotal)) * vPinMax) / 1024.0)* dividerRatio12v;
-  //  Serial.print("Sensor Voltage Out12v: ") && Serial.print(sensorV12v) && Serial.println(" Volts");
-
-
-  dividerRatio12v = 0.0;
-  return sensorV12v;
-}
-//-------------------------------------------------------------//
-float read7v() {
-  uint16_t sampleCountTotal = 10;
-  float sumReading = 0.0;
-  uint16_t sampleCount = 0;
-  float vIn7v = 0.0;
-  //const float dividerRatio7v = 13.22;
-  const float dividerRatio7v = 12.00;
-  float sensorV7v = 0.0;
-
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(analogInputA11);
-    sampleCount++;
-    delay(10);
-  }
-  sensorV7v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
-  //Serial.print("Sensor Voltage Out7v: ") && Serial.print(sensorV7v) && Serial.println(" Volts");
-  vIn7v = sensorV7v * dividerRatio7v;
-
-  return vIn7v;
-}
-//-------------------------------------------------------------//
-float read5v() {
-  uint16_t sampleCountTotal = 10;
-  float sumReading = 0.0;
-  uint16_t sampleCount = 0;
-  float vIn5v = 0.0;
-  const float dividerRatio5v = 13.22;
-  float sensorV5v = 0.0;
-
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(analogInputA12);
-    sampleCount++;
-    delay(10);
-  }
-  sensorV5v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
-  // Serial.print("Sensor Voltage Out5v: ") && Serial.print(sensorV5v) && Serial.println(" Volts");
-  vIn5v = sensorV5v * dividerRatio5v;
-  return vIn5v;
-}
-//-------------------------------------------------------------//
-float read3v() {
-  uint16_t sampleCountTotal = 10;
-  float sumReading = 0.0;
-  uint16_t sampleCount = 0;
-  float vIn3v = 0.0;
-  const float dividerRatio3v = 13.00;
-  float sensorV3v = 0.0;
-
-  while (sampleCount < sampleCountTotal) {
-    sumReading += analogRead(analogInputA13);
-    sampleCount++;
-    delay(10);
-  }
-  sensorV3v = (float(sumReading) / float(sampleCountTotal) * vPinMax) / 1024.0;
-  // Serial.print("Sensor Voltage Out3v: ") && Serial.print(sensorV3v) && Serial.println(" Volts");
-  vIn3v = sensorV3v * dividerRatio3v;
-  return vIn3v;
-}
-//-------------------------------------------------------------//
 void showSupplyVoltages() {
   String str12v = "";
   String str7v = "";
@@ -2506,7 +2339,7 @@ void showSupplyVoltages() {
 
   //Serial.println("----------------------------------------------------------------");
 
-  getDCVoltageActuals();
+  void getDCVoltageActuals();
 }
 //-------------------------------------------------------------//
 bool serialSetup() {
@@ -2552,10 +2385,10 @@ bool serialSetup() {
   return true;
 }
 //-------------------------------------------------------------//
-bool sendControllerIndicators (char* contIndValue[], uint16_t controllerIndicatorsArraySize) {
+bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicatorsArraySize) {
   const char startByte = '<';
   const char stopByte = '>';
-  const char heartBeat ='H';
+  //const char heartBeat = 'H';
   Serial.println();
   Serial.println("Controller Indicators to be sent to the WebPage: ");
   
@@ -2608,6 +2441,7 @@ bool sendControllerVoltages (String contVolValue[], uint16_t controllerVoltagesA
     Serial.println();
     return false;
   }
+  return true;
 }
 //-------------------------------------------------------------//
 bool sendSensorData(char* buffer, byte idx) {
@@ -2639,7 +2473,7 @@ bool sendSensorData(char* buffer, byte idx) {
 }
 //-------------------------------------------------------------//
 bool processSensorData(char* buffer, byte idxData) {
-  int maxValueLength = 10;
+  uint16_t maxValueLength = 10;
 
   for (uint16_t idx = 0; idx < idxData; idx++) {
 
@@ -2787,19 +2621,21 @@ bool processSensorData(char* buffer, byte idxData) {
   }
   digitalWrite(radioLinkOnLED, LOW);
   Serial.println();
-  rxActualLevel = outOfLimitsCheckActual(rxActualLevel);
-  rxPercentageLevel = outOfLimitsCheckPercentage(rxPercentageLevel);
-  tankLevelCheck(rxActualLevel, rxPercentageLevel, rxRefillSetPoint, rxFullSetPoint, rxTankHeight);
+  float rxActualLevel = outOfLimitsCheckActual(rxActualLevel);
+  float rxPercentageLevel = outOfLimitsCheckPercentage(rxPercentageLevel);
+  float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, uint16_t rxRefillSetPoint, uint16_t rxFullSetPoint, uint16_t rxTankHeight);
 
   if (rxActualLevel > 0) {
     return true;
   }
+  return false;
 }
 //-------------------------------------------------------------//
 bool rxSensorData() { //read data out of buffer of serial radio and transmit to web page
   const char startByte = '<';
   const char stopByte = '>';
   static byte index = 0;
+  String junk = "";
 
   if (serialSetup() == true) {
     digitalWrite(radioLinkOnLED, HIGH);
@@ -2814,7 +2650,7 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
           index = 0;
         } else if (inChar == stopByte) { // If end byte is received
           if (sendSensorData(buffer, index) == true) { // send Data to WebPage
-            processSensorData(buffer, index); // and process the data\
+            processSensorData(buffer, index); // and process the data
           } else {
             //  Serial.println("Webdata not Sent!");
           }
@@ -2830,7 +2666,7 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
           Serial.println("Overflow occured, next value is unreliable");
         }
       }
-      char junk = Serial1.read();
+      junk = Serial1.read();
     }
     else {
       Serial.println();
@@ -2891,8 +2727,8 @@ void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float 
   }
   Serial.println(F("----------------------------------------------------------------"));
 
-  logTime();
-  logData(rxActualLevel, rxPercentageLevel, rxTemperatureLevel, rxBatteryVoltageLevel);
+  void logTime();
+  void logData(float rxActualLevel, float rxPercentageLevel, uint16_t rxTemperatureLevel, float rxBatteryVoltageLevel);
 }
 //-------------------------------------------------------------//
 float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight) {
@@ -2909,7 +2745,7 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     return rxActualLevel;
   }
   else if (rxActualLevel <= (rxFullSetPoint + fullOffset) && digitalRead(pumpRunning) == LOW) { // Tank water level is full (<=rxFullSetPoint with pump stopped)
-    PrintCurrentRxedValues(rxActualLevel, rxPercentageLevel, rxRefillSetPoint, rxFullSetPoint, rxTankHeight);
+    void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight);
     digitalWrite(tankEmpty, LOW);
     digitalWrite(tankFilling, LOW);
     digitalWrite(tankFull, HIGH);
@@ -2919,7 +2755,7 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     return rxActualLevel;
   }
   else if (rxActualLevel > rxFullSetPoint && rxActualLevel < rxRefillSetPoint) { //water in tank, level between rxFullSetPoint & rxRefillSetPoint
-    PrintCurrentRxedValues(rxActualLevel, rxPercentageLevel, rxRefillSetPoint, rxFullSetPoint, rxTankHeight);
+    void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight);
     switch (digitalRead(pumpRunning)) {
       case LOW:  {
           digitalWrite(tankLevelOK, HIGH);
@@ -2941,7 +2777,7 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     }
   }
   else if (rxActualLevel > rxRefillSetPoint && rxActualLevel < rxTankHeight)  {  //tank is at low to empty mark >=tankLow & <= tankHeight & not in bypass mode
-    PrintCurrentRxedValues(rxActualLevel, rxPercentageLevel, rxRefillSetPoint, rxFullSetPoint, rxTankHeight);
+    void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight);
 
     Serial.println("LOW Water Level.");
 
@@ -2976,6 +2812,7 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     digitalWrite(tankFilling, LOW);
     digitalWrite(pumpRunning, LOW);
   }
+  return rxActualLevel;
 }
 //-------------------------------------------------------------//
 void vacVoltageCheck() {
@@ -3019,7 +2856,7 @@ void vacRelayControl() {
 }
 //-------------------------------------------------------------//
 void monStatus() {
-  modeControlMessage();
+  void modeControlMessage();
 
   if (digitalRead(alarmLED) == LOW) {
     Serial.println(F("No Alarms Active"));
@@ -3141,27 +2978,27 @@ void monStatus() {
 void modeControl() {
 
   if (digitalRead(modeAuto) == LOW && digitalRead(modeManual) == HIGH) {
-    autoMode();
+    void autoMode();
     modeInt += 1;
-    modeControlMessageDisplayCheck();
+    void modeControlMessageDisplayCheck();
   }
   else if (digitalRead(modeManual) == LOW && digitalRead(modeAuto) == HIGH) {
-    manualMode();
+    void manualMode();
     modeInt += 1;
-    modeControlMessageDisplayCheck();
+    void modeControlMessageDisplayCheck();
   }
   else if (digitalRead(modeAuto) == HIGH && digitalRead(modeManual) == HIGH) {
-    bypassMode();
+    void bypassMode();
     modeInt += 1;
-    modeControlMessageDisplayCheck();
+    void modeControlMessageDisplayCheck();
   }
 }
 //-------------------------------------------------------------//
 void modeControlMessageDisplayCheck() {
   if (modeInt == 1) {
-    modeControlMessage();
+    void modeControlMessage();
   }
-  modeInt == 0;
+  modeInt = 0;
 }
 //-------------------------------------------------------------//
 void modeControlMessage() {
@@ -3222,16 +3059,11 @@ void manualMode() {
   }
 }
 //-------------------------------------------------------------//
-boolean buzzerOperation() {
-  tone(piezoBuzzerPin, 1000, 500);
-  delay(1000);
-  return true;
-}
-//-------------------------------------------------------------//
 void buzzerActive() {
-
+bool buzzerOperationStatus = false;
+buzzerOperationStatus = buzzerOperation();
   while (digitalRead(modeManual) == LOW && (rxActualLevel <= (rxFullSetPoint + fullOffset))) {
-    if (buzzerOperation() == true) {
+    if (buzzerOperationStatus == true) {
       contIndValue[13] = "b1";
     }
   }
@@ -3267,14 +3099,14 @@ uint16_t angleToPulse(uint16_t ang) {
 boolean servoChangeToTank() {
   const uint16_t ang90 = 90;
   const uint16_t ang0 = 0;
-  long servo1PreviousMillis = 0;
-  long servo2PreviousMillis = 0;
-  long interval = 15000;
+  unsigned long servo1PreviousMillis = 0;
+  unsigned long servo2PreviousMillis = 0;
+  unsigned long interval = 15000;
 
   if (digitalRead(pumpRunning) == LOW && boolean(tankConnected) == false) {
     digitalWrite(servosRunningLED, HIGH);
     contIndValue[6] = "s1"; //servosRunning
-    unsigned long servo1CurrentMillis = millis();
+   unsigned long servo1CurrentMillis = millis();
     for (uint16_t angle = ang0; angle < ang90 + 1; angle += servoStepCount) {
 
       pwm.setPWM(0, 0, angleToPulse(ang90));
@@ -3320,15 +3152,16 @@ boolean servoChangeToTank() {
     return tankConnected = true;
   }
   //digitalWrite(servosRunningLED, LOW);
+  return tankConnected;
 }
 //-------------------------------------------------------------//
 boolean servoChangeFromTank() {
 
   const uint16_t ang90 = 90;
   const uint16_t ang0 = 0;
-  long servo1PreviousMillis = 0;
-  long servo2PreviousMillis = 0;
-  long interval = 15000;
+  unsigned long servo1PreviousMillis = 0;
+  unsigned long servo2PreviousMillis = 0;
+  unsigned long interval = 15000;
 
   if (digitalRead(pumpRunning) == LOW && boolean(tankConnected) == true) {
     digitalWrite(servosRunningLED, HIGH);
@@ -3377,6 +3210,7 @@ boolean servoChangeFromTank() {
     return tankConnected = false;
   }
   //digitalWrite(servosRunningLED, LOW);
+  return tankConnected;
 }
 //-------------------------------------------------------------//
 void servoControl() {
@@ -3384,43 +3218,43 @@ void servoControl() {
   if (digitalRead(pumpRunning) == HIGH && boolean(tankConnected) == false) {
     digitalWrite(pumpRunning, LOW);
     digitalWrite(tankFilling, LOW);
-    servoChangeToTank();
+    boolean servoChangeToTank();
     digitalWrite(pumpRunning, HIGH);
     digitalWrite(tankFilling, HIGH);
-    servoModeControlMessage();
+    void servoModeControlMessage();
   }
 
   else if (digitalRead(pumpRunning) == HIGH && boolean(tankConnected) == true) {
-    servoModeControlMessage();
+    void servoModeControlMessage();
   }
 
   else if (digitalRead(pumpRunning) == LOW && boolean (tankConnected) == false) {
-    servoModeControlMessage();
+    void servoModeControlMessage();
   }
 
   else if (digitalRead(pumpRunning) == LOW && boolean(tankConnected) == true) {
     // digitalWrite(tankFilling, LOW);
-    servoChangeFromTank();
-    servoModeControlMessage();
+    boolean servoChangeFromTank();
+    void servoModeControlMessage();
   }
 
   else if (digitalRead(modeAuto) == HIGH && (digitalRead(modeAuto) == HIGH)) { //bypass mode
     digitalWrite(pumpRunning, LOW);
     digitalWrite(tankFilling, LOW);
-    servoChangeFromTank();
-    servoModeControlMessage();
+    boolean servoChangeFromTank();
+    void servoModeControlMessage();
   }
   else if (digitalRead(modeManual) == LOW && (rxActualLevel <= (rxFullSetPoint + fullOffset))) {
     digitalWrite(pumpRunning, LOW);
     digitalWrite(tankFilling, LOW);
-    servoChangeFromTank();
-    servoModeControlMessage();
+    boolean servoChangeFromTank();
+    void servoModeControlMessage();
   }
   else if (digitalRead(modeAuto) == LOW && (rxActualLevel <= (rxFullSetPoint + fullOffset))) {
     digitalWrite(pumpRunning, LOW);
     digitalWrite(tankFilling, LOW);
-    servoChangeFromTank();
-    servoModeControlMessage();
+    boolean servoChangeFromTank();
+    void servoModeControlMessage();
   }
 }
 //-------------------------------------------------------------//
@@ -3564,3 +3398,199 @@ void ledTestCheck() {
   autoLEDTest = false;
 }
 //-------------------------------------------------------------//
+
+
+
+
+
+
+
+/*****************************************************************************************************************************************/
+//SETUP
+/*****************************************************************************************************************************************/
+void setup() {
+
+  Serial.begin(baud);
+  delay(50);
+
+  Serial.println(F("========================================"));
+  Serial.println(F("PUMP CONTROLLER SERIAL OUTPUT"));
+  Serial.println(F("========================================"));
+
+  /****tft*****/
+
+  pinMode(A0, OUTPUT);       //.kbv mcufriend have RD on A0
+  digitalWrite(A0, HIGH);
+
+  // Setup the tft
+  uint16_t ID = tft.readID();
+  tft.begin(ID);
+  tft.setRotation(Orientation);
+  tft.fillScreen(Black);
+
+  bool serialSetup();
+
+  void showSplash();
+
+  /****Controller*****/
+
+  void scanI2C(); //scan for I2C devices (SD/RTC & Servo)
+
+
+ 
+  if  (rtcSetup() == true)  {
+    Serial.println(F("RTC Initialised.......OK."));
+    Serial.println();
+
+    if (SD.begin(dataLoggerCS)) {
+      Serial.print("Initialising SD card........");// setup for the SD card
+      Serial.println();
+      sdOk = true;
+    }
+    else if (!SD.begin(dataLoggerCS)) {
+      Serial.println();
+      Serial.println(F("Initialisation of SD card....failed!"));
+      Serial.println();
+      sdOk = false;
+      return;
+    }
+    if (sdOk == true) {
+      Serial.println(F("SD Card Initialised.......OK."));
+      Serial.println();
+      dataFile = SD.open(dataFilename, FILE_WRITE); //open/create file
+    }
+    if (SD.exists(dataFilename)) {
+      logFile = true;
+      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" has been found and opened.");
+      Serial.println();
+
+      if (dataFile.size() > 0) {
+        Serial.print("Data Headings have already been written to the file: ") && Serial.println(dataFilename);
+        Serial.println();
+        dataFile.close();
+        Serial.print("File: ") && Serial.print(dataFilename)&& Serial.println(" has been closed");
+        Serial.println();
+      }
+      else {
+        Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is Empty!");
+        Serial.println();
+        if (dataFile) {  // if the file opened ok, write to it:
+          Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is ready for writing to!");
+          Serial.println();
+          Serial.print("Writing data 'Headings' to file: ") && Serial.print(dataFilename) && Serial.println(" .........");
+          Serial.println();
+
+          dataFile.println("Date,Time, Level, % Full, Temperature ºC, +12v, +7v, +5v, +3v3, Sensor Battery, Sensor Control"); // pruint16_t the headings for our data
+
+          Serial.println(F("Date,Time, Level, % Full, Temperature ºC, +12v, +7v, +5v, +3v3, Sensor Battery, Sensor Control"));
+          Serial.println();
+          Serial.print("Writing data to: ") && Serial.print(dataFilename) && Serial.println(" has completed.");
+          dataFile.close();
+        }
+        else {
+          logFile = false;
+          Serial.print("Error! Cannot write to file: ") && Serial.println(dataFilename);
+          Serial.println();
+          dataFile.close();
+        }
+      }
+    }
+    else {
+      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" cannot be found.");
+      Serial.println();
+    }
+  }
+   else if (rtcSetup() == false) {
+    Serial.println(F("RTC Initialisation.......failed!"));
+    Serial.println();
+  }
+
+
+  // define pwm module inits for servos
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+
+  //define piezo buzzer pin
+  pinMode(piezoBuzzerPin, OUTPUT);
+
+  //define data logging pin modes
+  pinMode(dataLoggerCS, OUTPUT);
+  pinMode(10, OUTPUT);
+
+  //define input pin modes for 28vac voltage sensing
+  pinMode(vacConst, INPUT_PULLUP);
+  pinMode(vacSwitched, INPUT_PULLUP);
+
+  // define pin modes for tx, rx for Serial1 (HC12 radio link)
+
+  pinMode(radioSETPin, OUTPUT);
+  digitalWrite(radioSETPin, HIGH); //LOW for command mode
+
+
+  //define analogue inputs
+  pinMode(analogInputA13, INPUT); // reads 12v Supply
+  pinMode(analogInputA12, INPUT); //reads 7v Supply
+  pinMode(analogInputA11, INPUT); //reads 5v Supply
+  pinMode(analogInputA10, INPUT); //reads 3v (3v3) Supply
+
+
+  //define input pin modes for tank status
+  pinMode(tankLevelOK, OUTPUT);
+  pinMode(tankEmpty, OUTPUT);
+  pinMode(tankFull, OUTPUT);
+  pinMode(tankFilling, OUTPUT);
+  pinMode(pumpRunning, OUTPUT);
+
+  //define input pin modes for relay control
+  pinMode(relay1, OUTPUT);    //28vac Constant
+  pinMode(relay2, OUTPUT);    //28vac Switched
+
+  //define input pin mode for control modes
+  pinMode(modeAuto, INPUT);
+  pinMode(modeManual, INPUT);
+  pinMode(modeAutoLED, OUTPUT);
+  pinMode(modeManualLED, OUTPUT);
+  pinMode(modeBypassLED, OUTPUT);
+  pinMode(vacActiveLED, OUTPUT);
+  pinMode(servosRunningLED, OUTPUT);
+  pinMode(radioLinkOnLED, OUTPUT);
+  pinMode(alarmLED, OUTPUT);
+  pinMode(ledTest, INPUT);
+
+  void ledTestCheck();
+
+  do {
+    //Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
+  } while (rxSensorData() == false);
+}
+/*****************************************************************************************************************************************/
+//LOOP
+/*****************************************************************************************************************************************/
+void loop() {
+  if (boolean(initCompleted) == false) {
+    boolean servoChangeFromTank();
+    void showMainMenu();
+    initCompleted = true;
+  }
+  void buttonPressed();
+  void getMode();
+  bool sendControllerIndicators(String contIndValue,  const uint16_t controllerIndicatorsArraySize);
+  bool sendControllerVoltages(String contVolValue[], const uint16_t controllerIndicatorsArraySize);
+  void getAlarmStatus();
+
+  bool rxSensorData();
+
+  drawLEDOperation();
+  if (rxActualLevelOld != rxActualLevel) {
+     void drawTankLevel( float rxActualLevel);
+     void getTankDetails();
+    rxActualLevelOld = rxActualLevel;
+  }
+  void showSupplyVoltages();
+  void vacVoltageCheck();
+  void vacRelayControl();
+  void modeControl();
+  void servoControl();
+  void monStatus();
+
+}
