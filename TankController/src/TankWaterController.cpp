@@ -53,7 +53,7 @@
 #define piezoBuzzerPin 25
 
 #define dataLoggerCS 53
-String dataFilename = "DATALOG.TXT";
+char dataFilename[] = "DATALOG.TXT";
 boolean sdOk = false;
 File dataFile;
 RTC_DS1307 rtc;
@@ -1337,16 +1337,15 @@ void showPageTitles() { //shows info on all pages
 //---------------------------------------------------------------------------------
 void showDTG () { //shows DTG details centre bottom of screen
 
-  DateTime DTG = rtc.now();
+  DateTime DTG= rtc.now();
   pageTitleX = 190;
   pageTitleY = 310;
 
   tft.setTextSize(1);
   tft.setTextColor(White, Black);
   tft.setCursor(pageTitleX, pageTitleY);
-
-  if (rtc.now) {
-
+ 
+  if (rtc.begin()) { //if RTC is working show DTG details
     if (DTG.day() < 10) { //PRuint16_tA 0 IN FRONT OF THE DAYS IF LESS THAN 10
       tft.print('0');
       tft.print(DTG.day(), DEC);
@@ -2288,7 +2287,7 @@ void logTime() {
 
   if (sdOk == true) {
     DateTime DTG = rtc.now();
-    if (rtc.now) {
+    if (rtc.begin()) {
       if (DTG.day() < 10) { //Print a 0 IN FRONT OF THE DAYS IF LESS THAN 10
         dataFile.print('0');
         dataFile.print(DTG.day(), DEC);
