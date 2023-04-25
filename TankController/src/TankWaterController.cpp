@@ -3580,7 +3580,7 @@ void loop() {
 
   bool rxSensorData();
 
-  drawLEDOperation();
+  void drawLEDOperation();
   if (rxActualLevelOld != rxActualLevel) {
      void drawTankLevel( float rxActualLevel);
      void getTankDetails();
