@@ -2,6 +2,22 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"name": "ESP8266WebServerTankMonitoring",
+			"path": "ESP8266WebServerTankMonitoring"
+		},
+		{
+			"name": "TankController",
+			"path": "TankController"
+		},
+		{
+			"name": "TankSensor",
+			"path": "TankSensor"
+		},
+		{
+			"name": "TankRemoteDisplay",
+			"path": "TankRemoteDisplay"
 		}
 	],
 	"settings": {}
