@@ -1824,15 +1824,13 @@ float outOfLimitsCheckActual(float rxActualLevel) {
 float outOfLimitsCheckPercentage(float rxPercentageLevel) {
 
   if (rxPercentageLevel < 0) {
-    rxPercentageLevel = 0;
-    return rxPercentageLevel;
+    rxPercentageLevel= 0;
   }
   else if (rxPercentageLevel > 100) {
     rxPercentageLevel = 100;
-    return rxPercentageLevel;
   }
   else if (rxPercentageLevel >= 0 && rxPercentageLevel <= 100) {
-    return rxPercentageLevel;
+     return rxPercentageLevel;
   }
   return rxPercentageLevel;
 }
@@ -1854,7 +1852,7 @@ void drawTankLevel(float rxActualLevel) {
     uint16_t rectHeight = -180;
     //uint16_t txtSpacePage3 = 0.0;
     
-   //float tankLevelPtrPage3 = 0.0;
+   //float tankLevelPtrPage3;
 
     //Setup dividers and headings additional to frame for tank page
     tft.drawLine(140, 10, 140, 308, ForestGreen);
@@ -1875,7 +1873,8 @@ void drawTankLevel(float rxActualLevel) {
     tft.setCursor(55, 260);
     tft.print("Empty");
 
-    tankLevelPtrPage3 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+   float tankLevelPtrPage3 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+
     //Serial.println("Tank Sections co-ords: Page 1");
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);  //tank
     void updateTankLevel (float rxPercentageLevel, uint16_t  xPosRectStart, uint16_t  yPosRectStart, uint16_t  rectWidth, float tankLevelPtrPage3, uint16_t txtSpacePage3);
@@ -1900,9 +1899,10 @@ void drawTankLevel(float rxActualLevel) {
     tft.setCursor(433, 50);
     tft.print("Full");
     tft.setCursor(428, 235);
-    tft.print("Empty");
+    tft.print("Empty"); 
+//fix dclaration for tankLevelPtrPage2
 
-    tankLevelPtrPage2 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+   float tankLevelPtrPage2 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);
    void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t yPosRectStart, uint16_t rectWidth, float tankLevelPtrPage2, uint16_t txtSpacePage2);
   }
