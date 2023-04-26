@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <avr8-stub.h>
 /*******Controller**************/
 #include <SD.h>
 #include <Servo.h>
@@ -749,7 +749,6 @@ void showTopHeadings() {
   tft.println("Mode:  ");
 }
 //--------------------------------------------------------------------------
-
 void getMode() {
 
   uint16_t xPos = 440;
@@ -1355,6 +1354,7 @@ void showSystem() {
 }
 //---------------------------------------------------------------------------------
 boolean showTemperature() {
+  bool isTemperature = true;
   if (currentPage == 2) { //Control Status
     tft.setTextSize(1);
     tft.setTextColor(White);
@@ -1372,7 +1372,7 @@ boolean showTemperature() {
       tft.setCursor(165, 285);
       tft.setTextColor(Red);
       tft.print("ERROR!");
-      return false;
+      isTemperature = false;
     }
     //else if (rxTemperatureLevel > tempMin && rxTemperatureLevel <= tempMax ) { //normal operating levels
     else { //normal operating levels
@@ -1384,9 +1384,10 @@ boolean showTemperature() {
       tft.setCursor(165, 285);
       tft.setTextColor(Black);
       tft.print("ERROR!");
-      return true;
+      isTemperature = true;
     }
   }
+  return isTemperature;
 }
 //---------------------------------------------------------------------------------
 void drawLEDArrays(uint16_t Size, uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) {
@@ -1505,8 +1506,8 @@ void showTankLevelDefinitions() {
   uint16_t tankLevelSpacing = -40;
   uint16_t xPosT = 200;
   uint16_t yPosT = 230;
-  uint16_t xPosRect = 165;
-  uint16_t yPosRect = 225;
+  //uint16_t xPosRect = 165;
+  //uint16_t yPosRect = 225;
 
    uint16_t ArraySize = labelTankLevels(tankLevelLabels, tankLevelArraySize, tankLevelSpacing, xPosT, yPosT);
   void drawTankLevelArrays(uint16_t ArraySize, uint16_t tankLevelSpacing, uint16_t xPosRect, uint16_t yPosRect);
@@ -1532,6 +1533,8 @@ uint16_t labelRelayControls(const char* arrayName[], uint16_t arraySize, uint16_
   return arraySize;
 }
 //---------------------------------------------------------------------------------
+//test drawLEDSCluster function
+
 void drawLEDSCluster() {
 
   uint16_t ArraySize = 0;
@@ -1565,7 +1568,7 @@ void drawLEDSCluster() {
     uint16_t yContCircle = 48;
     //Serial.println("Controller LED co-ords:Page 2");
     ArraySize = labelLEDS(ledControlLabels, ledControlArraySize, ledSpacing, xContTxt, yContTxt);
-    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xContCircle, uint16_t yContCircle);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t &xContCircle, uint16_t &yContCircle);
 
     //Mode LED's
 
@@ -1575,7 +1578,7 @@ void drawLEDSCluster() {
     uint16_t yModeCircle = 251;
     //Serial.println("Mode LED co-ords:Page 2");
     ArraySize = labelLEDS(ledModeLabels, ledModeArraySize, ledSpacing, xModeTxt, yModeTxt);
-    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t xModeCircle, uint16_t yModeCircle);
+    void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t &xModeCircle, uint16_t &yModeCircle);
 
     // Relay LED's
 
@@ -1849,9 +1852,9 @@ void drawTankLevel(float rxActualLevel) {
     uint16_t yPosRectStart = 245;
     uint16_t rectWidth = 100;
     uint16_t rectHeight = -180;
-    uint16_t txtSpacePage3 = 0.0;
+    //uint16_t txtSpacePage3 = 0.0;
     
-   float tankLevelPtrPage3 = 0.0;
+   //float tankLevelPtrPage3 = 0.0;
 
     //Setup dividers and headings additional to frame for tank page
     tft.drawLine(140, 10, 140, 308, ForestGreen);
@@ -1883,8 +1886,8 @@ void drawTankLevel(float rxActualLevel) {
     uint16_t yPosRectStart = 220;
     uint16_t rectWidth = 50;
     uint16_t rectHeight = -150;
-    uint16_t txtSpacePage2 = 0.0;
-    float tankLevelPtrPage2 = 0.0;
+   // uint16_t txtSpacePage2 = 0.0;
+    //float tankLevelPtrPage2 = 0.0;
 
     //Setup dividers and headings additional to frame for control page
     tft.setTextSize(2);
@@ -2474,6 +2477,7 @@ bool sendSensorData(char* buffer, byte idx) {
 //-------------------------------------------------------------//
 bool processSensorData(char* buffer, byte idxData) {
   uint16_t maxValueLength = 10;
+  bool isRxActualLevel = false;
 
   for (uint16_t idx = 0; idx < idxData; idx++) {
 
@@ -2621,14 +2625,15 @@ bool processSensorData(char* buffer, byte idxData) {
   }
   digitalWrite(radioLinkOnLED, LOW);
   Serial.println();
-  float rxActualLevel = outOfLimitsCheckActual(rxActualLevel);
-  float rxPercentageLevel = outOfLimitsCheckPercentage(rxPercentageLevel);
+  rxActualLevel = outOfLimitsCheckActual (rxActualLevel);
+  rxPercentageLevel = outOfLimitsCheckPercentage (rxPercentageLevel);
   float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, uint16_t rxRefillSetPoint, uint16_t rxFullSetPoint, uint16_t rxTankHeight);
 
   if (rxActualLevel > 0) {
     return true;
+    isRxActualLevel = true;
   }
-  return false;
+  return isRxActualLevel;
 }
 //-------------------------------------------------------------//
 bool rxSensorData() { //read data out of buffer of serial radio and transmit to web page
@@ -3410,6 +3415,10 @@ void ledTestCheck() {
 /*****************************************************************************************************************************************/
 void setup() {
 
+   // initialize GDB stub
+  debug_init();
+
+  /****Serial*****/
   Serial.begin(baud);
   delay(50);
 
