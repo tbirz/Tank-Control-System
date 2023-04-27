@@ -537,38 +537,6 @@ $(document).ready(function(){
             </tbody>
         </table>
 
-        <table id="fixedInfo" class="table table-bordered table-sm border border-info">
-          <h6><span class="badge badge-info">Water Tank Static Info</span></h6>
-          <thead class="bg-info border border-info">
-            <tr class="d-flex">
-              <th class="col-6 border border-info">Description</th>
-              <th class="col-4 border border-info">Value</th>
-              <th class="col-2 border border-info">Unit</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr id="fixedInfo1" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Tank Height</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="TankHeight">---.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
-            </tr>
-            <tr id="fixedInfo2" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Refill Set Point</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="RefillSetPoint">---.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
-            </tr>
-            <tr id="fixedInfo3" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Full Set Point</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="FullSetPoint">--.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
-            </tr>
-            <tr id="fixedInfo4" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Total Capacity (Volume)</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="TotalCapacity">-----.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">Ltrs</td>
-            </tr>
-          </tbody>
-        </table>
         <table id="controlFunctions class="table table-bordered table-sm border border-info">
           <h6><span class="badge badge-info">Select Control Functions</span></h6>
           <thead class="bg-info border border-info">
@@ -577,10 +545,10 @@ $(document).ready(function(){
           </thead>
           <tbody>
             <tr id="controlFunctions1" class="d-flex">
-            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectAutoMode()">Select Auto Mode</button>  
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="spare()">spare button</button>  
             </tr>
             <tr id="controlFunctions2" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectManualMode()">Select Manual Mode</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="spare()">spare button</button>  
               </tr>
               <tr id="controlFunctions3" class="d-flex">
                 <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectPumpOff()">Switch Pump Off</button>
@@ -766,27 +734,15 @@ $(document).ready(function(){
               <td class="col-4 font-weight-bold border border-dark"><span id="Controller3v3">--.--</span></td>
               <td class="col-3 font-weight-bold border border-dark">Volts</td>
             </tr>
-          </tbody>
-        </table>
-         <table id="controllerVacVoltages" class="table table-bordered table-sm border border-warning">
-          <h6><span class="badge badge-warning">Controller AC Voltages</span></h6>
-          <thead class="bg-warning border border-warning">
-            <tr class="d-flex border border-warning">
-              <th class="col-5 border border-warning">Voltage</th>
-              <th class="col-4 border border-warning">Value</th>
-              <th class="col-3 border border-warning">Unit</th>
+            <tr id="controllerVoltages5" class="d-flex">
+              <td class="col-5 font-weight-bold border border-dark">Constant (28v)</td>
+              <td class="col-4 font-weight-bold border border-dark"><span id="controllerVacConst">--.--</span></td>
+              <td class="col-3 font-weight-bold border border-dark">VAC</td>
             </tr>
-          </thead>
-          <tbody>
-            <tr id="controllerVacVoltages1" class="d-flex">
-              <td class="col-5 font-weight-bold border border-warning">Constant (28v)</td>
-              <td class="col-4 font-weight-bold border border-warning"><span id="controllerVacConst">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-warning">VAC</td>
-            </tr>
-            <tr id="controllerVacVoltages2" class="d-flex">
-              <td class="col-5 font-weight-bold border border-warning">Switched (28v)</td>
-              <td class="col-4 font-weight-bold border border-warning"><span id="controllerVacSw">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-warning">VAC</td>
+            <tr id="controllerVoltages6" class="d-flex">
+              <td class="col-5 font-weight-bold border border-dark">Switched (28v)</td>
+              <td class="col-4 font-weight-bold border border-dark"><span id="controllerVacSw">--.--</span></td>
+              <td class="col-3 font-weight-bold border border-dark">VAC</td>
             </tr>
           </tbody>
         </table>
@@ -809,6 +765,39 @@ $(document).ready(function(){
               <td class="col-5 font-weight-bold border border-secondary">Control (5v)</td>
               <td class="col-4 font-weight-bold border border-secondary"><span id="SensorControl5v">--.--</span></td>
               <td class="col-3 font-weight-bold border border-secondary">Volts</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table id="fixedInfo" class="table table-bordered table-sm border border-info">
+          <h6><span class="badge badge-info">Water Tank Static Info</span></h6>
+          <thead class="bg-info border border-info">
+            <tr class="d-flex">
+              <th class="col-6 border border-info">Description</th>
+              <th class="col-4 border border-info">Value</th>
+              <th class="col-2 border border-info">Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="fixedInfo1" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Tank Height</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="TankHeight">---.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo2" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Refill Set Point</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="RefillSetPoint">---.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo3" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Full Set Point</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="FullSetPoint">--.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo4" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Total Capacity (Volume)</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="TotalCapacity">-----.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">Ltrs</td>
             </tr>
           </tbody>
         </table>
@@ -1744,22 +1733,22 @@ function checkControllerACVoltageLevels() {
 
       //vac Const
     if (valueVacConst >= 23.5 && valueVacConst <= 29.5) {
-        document.getElementById("controllerVacVoltages1").style.backgroundColor = "yellowgreen";
-        document.getElementById("controllerVacVoltages1").style.color = "initial";
+        document.getElementById("controllerVoltages5").style.backgroundColor = "yellowgreen";
+        document.getElementById("controllerVoltages5").style.color = "initial";
       }
       else {
-        document.getElementById("controllerVacVoltages1").style.backgroundColor = "red";
-        document.getElementById("controllerVacVoltages1").style.color = "white";
+        document.getElementById("controllerVoltages5").style.backgroundColor = "red";
+        document.getElementById("controllerVoltages5").style.color = "white";
       }
 
       //vac Switched
       if (valueVacSw >= 23.5 && valueVacSw <= 29.5) {
-        document.getElementById("controllerVacVoltages2").style.backgroundColor = "yellowgreen";
-        document.getElementById("controllerVacVoltages2").style.color = "initial";
+        document.getElementById("controllerVoltages6").style.backgroundColor = "yellowgreen";
+        document.getElementById("controllerVoltages6").style.color = "initial";
       }
       else {
-        document.getElementById("controllerVacVoltages2").style.backgroundColor = "red";
-        document.getElementById("controllerVacVoltages2").style.color = "white";
+        document.getElementById("controllerVoltages6").style.backgroundColor = "red";
+        document.getElementById("controllerVoltages6").style.color = "white";
       }
 }    
 //----------------------------------------------------------------------------
