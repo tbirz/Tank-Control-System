@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <avr8-stub.h>
+//#include <avr8-stub.h>
 /*******Controller**************/
 #include <SD.h>
 #include <Servo.h>
@@ -54,7 +54,7 @@
 
 #define dataLoggerCS 53
 char dataFilename[] = "DATALOG.TXT";
-boolean sdOk = false;
+bool sdOk = false;
 File dataFile;
 RTC_DS1307 rtc;
 
@@ -115,16 +115,16 @@ const float vPinMax = 5.0; //with usb not connected
 const float tempMin = 0.0;
 const float tempMax = 85.0;
 const float fullOffset = 0.5;
-boolean rtcRunning = false;
-boolean initCompleted = false;
-boolean autoLEDTest = true;
-boolean tankConnected = true;
-boolean servoControllerFound = false;
-boolean miniDataLoggerModuleFound = false;
-boolean serialWifiFound = false;
-boolean servo1Failed = false;
-boolean servo2Failed = false;
-boolean logFile = false;
+bool rtcRunning = false;
+bool initCompleted = false;
+bool autoLEDTest = true;
+bool tankConnected = true;
+bool servoControllerFound = false;
+bool miniDataLoggerModuleFound = false;
+bool serialWifiFound = false;
+bool servo1Failed = false;
+bool servo2Failed = false;
+bool logFile = false;
 const byte maxBuffer = 64;
 static char buffer[maxBuffer];
 
@@ -1450,7 +1450,7 @@ void drawRelayLEDArrays(uint16_t spacing, uint16_t xPosCirc, uint16_t yPosCirc) 
 
     // Serial.print(idx) && Serial.print(". ") && Serial.print(xPosCirc) && Serial.print(",") &&  Serial.println(yPosCirc);
   }
-}
+}                 
 //---------------------------------------------------------------------------------
 uint16_t labelTankLevels(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
 
@@ -1503,14 +1503,14 @@ void drawTankLevelArrays(uint16_t Size, uint16_t spacing, uint16_t xPosRect, uin
 //---------------------------------------------------------------------------------
 void showTankLevelDefinitions() {
 
-  uint16_t tankLevelSpacing = -40;
-  uint16_t xPosT = 200;
-  uint16_t yPosT = 230;
+  //uint16_t tankLevelSpacing = -40;
+  //uint16_t xPosT = 200;
+  //uint16_t yPosT = 230;
   //uint16_t xPosRect = 165;
   //uint16_t yPosRect = 225;
+  uint16_t labelTankLevels(const char tankLevelLabels, const uint16_t tankLevelArraySize, uint16_t tankLevelSpacing, uint16_t xPosT, uint16_t yPosT);
 
-   uint16_t ArraySize = labelTankLevels(tankLevelLabels, tankLevelArraySize, tankLevelSpacing, xPosT, yPosT);
-  void drawTankLevelArrays(uint16_t ArraySize, uint16_t tankLevelSpacing, uint16_t xPosRect, uint16_t yPosRect);
+  void drawTankLevelArrays(uint16_t tankLevelArraySize, uint16_t tankLevelSpacing, uint16_t xPosRect, uint16_t yPosRect);
 }
 //---------------------------------------------------------------------------------
 uint16_t labelRelayControls(const char* arrayName[], uint16_t arraySize, uint16_t spacing, uint16_t xPosT, uint16_t yPosT) {
@@ -1564,8 +1564,8 @@ void drawLEDSCluster() {
 
     uint16_t xContTxt = 40;
     uint16_t yContTxt = 45;
-    uint16_t xContCircle = 20;
-    uint16_t yContCircle = 48;
+    //uint16_t xContCircle = 20;
+    //uint16_t yContCircle = 48;
     //Serial.println("Controller LED co-ords:Page 2");
     ArraySize = labelLEDS(ledControlLabels, ledControlArraySize, ledSpacing, xContTxt, yContTxt);
     void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t &xContCircle, uint16_t &yContCircle);
@@ -1574,8 +1574,8 @@ void drawLEDSCluster() {
 
     uint16_t xModeTxt = 40;
     uint16_t yModeTxt = 248;
-    uint16_t xModeCircle = 20;
-    uint16_t yModeCircle = 251;
+    //uint16_t xModeCircle = 20;
+    //uint16_t yModeCircle = 251;
     //Serial.println("Mode LED co-ords:Page 2");
     ArraySize = labelLEDS(ledModeLabels, ledModeArraySize, ledSpacing, xModeTxt, yModeTxt);
     void drawLEDArrays(uint16_t ArraySize, uint16_t ledSpacing, uint16_t &xModeCircle, uint16_t &yModeCircle);
@@ -1586,8 +1586,8 @@ void drawLEDSCluster() {
     uint16_t yRelayControlTxt = 57;
     uint16_t xRelayTxt = 175;
     uint16_t yRelayTxt = 42;
-    uint16_t xRelayCircle = 178;
-    uint16_t yRelayCircle = 40;
+   // uint16_t xRelayCircle = 178;
+   // uint16_t yRelayCircle = 40;
 
     tft.setTextSize(1);
     tft.setTextColor(Orange);
@@ -1604,11 +1604,11 @@ void drawLEDSCluster() {
     uint16_t yServoTxt = 270;
 
     //Vertical Servo
-    uint16_t xServoCircle1 = 290;
-    uint16_t yServoCircle1 = 273;
+    //uint16_t xServoCircle1 = 290;
+    //uint16_t yServoCircle1 = 273;
     //Horizontal Servo
-    uint16_t xServoCircle2 = 370;
-    uint16_t yServoCircle2 = 273;
+   // uint16_t xServoCircle2 = 370;
+    //uint16_t yServoCircle2 = 273;
 
     tft.setTextSize(1);
     tft.setTextColor(LightSalmon);
@@ -1628,12 +1628,12 @@ void drawLEDSCluster() {
 
     uint16_t xACVoltageTxt = 312.5;
     uint16_t yACVoltageTxt = 45;
-    uint16_t xACVoltageCircle = 290;
-    uint16_t yACVoltageCircle = 48;
+   // uint16_t xACVoltageCircle = 290;
+   // uint16_t yACVoltageCircle = 48;
     uint16_t xDCVoltageTxt = 312.5;
     uint16_t yDCVoltageTxt = 102;
-    uint16_t xDCVoltageCircle = 290;
-    uint16_t yDCVoltageCircle = 105;
+   // uint16_t xDCVoltageCircle = 290;
+   // uint16_t yDCVoltageCircle = 105;
 
     tft.setTextColor(LightSalmon);
     tft.setCursor(270, 30);
@@ -1718,11 +1718,11 @@ void buildPageFrame() {
   const uint16_t frameLeft = 1;
   const uint16_t frameRight = 479;
 
-  tft.drawLine(1, 10, 1, 308, ForestGreen);
-  tft.drawLine(1, 10, 479, 10, ForestGreen);
-  tft.drawLine(1, 10, 479, 10, ForestGreen);
-  tft.drawLine(1, 308, 479, 308, ForestGreen);
-  tft.drawLine(479, 10, 479, 308, ForestGreen);
+  tft.drawLine(frameLeft, frameTop, frameLeft, frameBottom, ForestGreen);
+  tft.drawLine(frameLeft, frameTop, frameRight, frameTop, ForestGreen);
+  tft.drawLine(frameLeft, frameTop, frameRight, frameTop, ForestGreen);
+  tft.drawLine(frameLeft, frameBottom, frameRight, frameBottom, ForestGreen);
+  tft.drawLine(frameRight, frameTop, frameRight, frameBottom, ForestGreen);
 }
 //---------------------------------------------------------------------------------
 void getDCVoltageActuals() {
@@ -1873,8 +1873,8 @@ void drawTankLevel(float rxActualLevel) {
     tft.setCursor(55, 260);
     tft.print("Empty");
 
-   float tankLevelPtrPage3 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
-
+//float tankLevelPtrPage3 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+ mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
     //Serial.println("Tank Sections co-ords: Page 1");
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);  //tank
     void updateTankLevel (float rxPercentageLevel, uint16_t  xPosRectStart, uint16_t  yPosRectStart, uint16_t  rectWidth, float tankLevelPtrPage3, uint16_t txtSpacePage3);
@@ -1900,9 +1900,9 @@ void drawTankLevel(float rxActualLevel) {
     tft.print("Full");
     tft.setCursor(428, 235);
     tft.print("Empty"); 
-//fix dclaration for tankLevelPtrPage2
 
-   float tankLevelPtrPage2 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+ //float tankLevelPtrPage2 = mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
+  mapTankLevelPtr (rxPercentageLevel, yPosRectStart, rectHeight);
     tft.drawRect(xPosRectStart, yPosRectStart, rectWidth, rectHeight, White);
    void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t yPosRectStart, uint16_t rectWidth, float tankLevelPtrPage2, uint16_t txtSpacePage2);
   }
@@ -2650,12 +2650,12 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
 
       while (Serial1.available() > 0 ) {
         char inChar = Serial1.read();
-        // Serial.print("InChar[") && Serial.print(index) && Serial.print("]") && Serial.println(inChar);
+         Serial.print("InChar[") && Serial.print(index) && Serial.print("]") && Serial.println(inChar);
         if (inChar == startByte) { // If start byte is received
           index = 0;
         } else if (inChar == stopByte) { // If end byte is received
           if (sendSensorData(buffer, index) == true) { // send Data to WebPage
-            processSensorData(buffer, index); // and process the data
+           processSensorData(buffer, index); // and process the data
           } else {
             //  Serial.println("Webdata not Sent!");
           }
@@ -3313,10 +3313,10 @@ void servoModeControlMessage() {
 }
 //-------------------------------------------------------------//
 bool rtcSetup() {
-
+ bool isRtcRunning = false;
   if (!rtc.begin()) {
     Serial.println(F("Couldn't find RTC"));
-    while (1);
+   //while (1);
   }
   else {
     // following line sets the RTC to the date & time this sketch was compiled
@@ -3326,12 +3326,13 @@ bool rtcSetup() {
     //or
     // rtc.adjust(DateTime(rtc.now()));
     Serial.println(F("RTC is running!"));
-    return true;
+    isRtcRunning = true;
   }
   if (!rtc.isrunning()) {
     Serial.println(F("RTC is NOT running!"));
-    return false;
+    isRtcRunning = false;
   }
+  return isRtcRunning;
 }
 //-------------------------------------------------------------//
 void ledTestCheck() {
@@ -3416,7 +3417,7 @@ void ledTestCheck() {
 void setup() {
 
    // initialize GDB stub
-  debug_init();
+ //debug_init();
 
   /****Serial*****/
   Serial.begin(baud);

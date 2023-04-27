@@ -569,6 +569,36 @@ $(document).ready(function(){
             </tr>
           </tbody>
         </table>
+        <table id="controlFunctions class="table table-bordered table-sm border border-info">
+          <h6><span class="badge badge-info">Select Control Functions</span></h6>
+          <thead class="bg-info border border-info">
+            <tr class="d-flex">
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="controlFunctions1" class="d-flex">
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectAutoMode()">Select Auto Mode</button>  
+            </tr>
+            <tr id="controlFunctions2" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectManualMode()">Select Manual Mode</button>  
+              </tr>
+              <tr id="controlFunctions3" class="d-flex">
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectPumpOff()">Switch Pump Off</button>
+              </tr>
+              <tr id="controlFunctions4" class="d-flex">
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectPumpOn()">Switch Pump On</button>
+              </tr>  
+            <tr id="controlFunctions5" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="changeServoPosition()">Change Servo(s) Position</button>
+            </tr>
+            <tr id="controlFunctions6" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="resetController()">Reset Controller</button>
+            </tr>
+            <tr id="controlFunctions7" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectRefreshPage()">Refresh Page</button>  
+              </tr>
+          </tbody>
+        </table>
         <table id="popoverRef" class="d-none table-bordered table-sm border border-success">
           <h6><span class="d-none badge badge-success">popoverRef</span></h6>
             <thead class=" bg-success border border-success">
