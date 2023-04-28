@@ -1377,15 +1377,17 @@ function btnSpare2() {
 }
 }
 
-function btnresetController() {
-  if(Sofunction selectPumpON() {
+function selectPumpON() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpON";
   Socket.send(document.getElementById("txBuff").value);
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
   document.getElementsById("txBuff")=="";
 }
-}cket.readyState==1 && document.getElementById("txBuff").value == "") {
+}
+
+function btnresetController() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetCont";
   Socket.send(document.getElementById("txBuff").value);
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
