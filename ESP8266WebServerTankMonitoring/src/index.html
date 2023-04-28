@@ -545,25 +545,25 @@ $(document).ready(function(){
           </thead>
           <tbody>
             <tr id="controlFunctions1" class="d-flex">
-            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="spare()">spare button</button>  
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnspare1()">spare button</button>  
             </tr>
             <tr id="controlFunctions2" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="spare()">spare button</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnspare2()">spare button</button>  
               </tr>
               <tr id="controlFunctions3" class="d-flex">
-                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectPumpOff()">Switch Pump Off</button>
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOff()">Switch Pump Off</button>
               </tr>
               <tr id="controlFunctions4" class="d-flex">
-                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectPumpOn()">Switch Pump On</button>
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOn()">Switch Pump On</button>
               </tr>  
             <tr id="controlFunctions5" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="changeServoPosition()">Change Servo(s) Position</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnchangeServoPosition()">Change Servo(s) Position</button>
             </tr>
             <tr id="controlFunctions6" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="resetController()">Reset Controller</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnresetController()">Reset Controller</button>
             </tr>
             <tr id="controlFunctions7" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="selectRefreshPage()">Refresh Page</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnrefreshPage()">Refresh Page</button>  
               </tr>
           </tbody>
         </table>
@@ -1355,9 +1355,73 @@ function socketErrors() {// Log errors
     console.log('WebSocket Error: ' + e.message);
   } 
 }
+//----------------------------------------------------------------------------
+// Functions for Control Buttons
+//----------------------------------------------------------------------------
+
+function btnSpare1() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="spare1";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}
+
+function btnSpare2() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="spare2";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}
+
+function btnresetController() {
+  if(Sofunction selectPumpON() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpON";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}cket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="resetCont";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}
+
+function btnchangeServoPosition() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="servoPosChange";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}
+
+function btnselectPumpON() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpON";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted") 
+  document.getElementsById("txBuff")=="";
+}
+}
     
+function btnselectPumpOff() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpOff";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
+  document.getElementsById("txBuff")=="";
+}
+}
+//----------------------------------------------------------------------------
 function enterPressed() {//function for when 'send' button pressed
-   if(Socket.readyState==1) {
+   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
       document.getElementById("txButt").style.color="red"; 
       Socket.send(document.getElementById("txBuff").value); //Send the data from txBuff input to server, to use this function just input the string you want to send.
        //alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
