@@ -494,11 +494,21 @@ $(document).ready(function(){
   </div
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="display:inline-block>
-  <form class="d-none"> 
+  <form class="form-inline"> 
    <input class="form-control ml-sm-5" id="rxConsole"  type="text" readonly placeholder="Rx Data (read only)">   
-     <input class="form-control ml-sm-5" "type="text" id="txBuff" placeholder="Enter Control Code" onkeydown="if(event.keyCode == 13) enterPressed();">
-    <input class="btn btn-success ml-sm-2" id="txButt" type="submit" onclick="enterPressed();" value="Submit">
+   <input class="form-control ml-sm-5" type="text" id="txBuff" placeholder="Enter Control Code" onkeydown="if(event.keyCode == 13) enterPressed();">
+   <input class="btn btn-success ml-sm-2" id="txButt" type="submit" onclick="enterPressed();" value="Submit">
   </form> 
+  <form>
+    <div class="form-row">
+      <div class="col">
+        <input type="text" class="form-control ml-sm-5" id="rxConsole" readonly placeholder="Rx Data (readonly)">
+      </div>
+      <div class="col">
+        <input type="text" class="form-control ml-sm-5" id="txBuff" placeholder="txConsole">
+      </div>
+    </div>
+  </form>
 </nav>
 <br>
   <div class="container">
