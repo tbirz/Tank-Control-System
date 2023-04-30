@@ -493,22 +493,12 @@ $(document).ready(function(){
     <p style="text-align:center; color: navy; font-size:85%;">WS-Status: <span style="color: white; font-size:85%;" id='ws-Status'>Status</span></p>
   </div
 
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="display:inline-block>
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="display:inline-block" justify-content-center>
   <form class="form-inline"> 
    <input class="form-control ml-sm-5" id="rxConsole"  type="text" readonly placeholder="Rx Data (read only)">   
-   <input class="form-control ml-sm-5" type="text" id="txBuff" placeholder="Enter Control Code" onkeydown="if(event.keyCode == 13) enterPressed();">
+   <input class="form-control ml-sm-5" type="text" id="txBuff" placeholder="Tx Data" onkeydown="if(event.keyCode == 13) enterPressed();">
    <input class="btn btn-success ml-sm-2" id="txButt" type="submit" onclick="enterPressed();" value="Submit">
   </form> 
-  <form>
-    <div class="form-row">
-      <div class="col">
-        <input type="text" class="form-control ml-sm-5" id="rxConsole" readonly placeholder="Rx Data (readonly)">
-      </div>
-      <div class="col">
-        <input type="text" class="form-control ml-sm-5" id="txBuff" placeholder="txConsole">
-      </div>
-    </div>
-  </form>
 </nav>
 <br>
   <div class="container">
