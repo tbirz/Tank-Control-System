@@ -1424,7 +1424,7 @@ function enterPressed() {//function for when 'send' button pressed
       document.getElementById("txButt").style.color="red"; 
       Socket.send(document.getElementById("txBuff").value); //Send the data from txBuff input to server, to use this function just input the string you want to send.
        //alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
-      document.getElementById("txBuff").value = ""; //clears the texbox after data is sent
+      document.getElementById("txBuff").value = ""; //clears the textbox after data is sent
    }
    else if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
          alert("To submit you must add text!.");
