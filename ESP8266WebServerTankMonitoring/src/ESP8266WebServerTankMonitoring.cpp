@@ -2126,7 +2126,27 @@ void handleWebRequests(){
   Serial.println(msg);
 }
 //------------------------------------------------------------------------//
+void clientCommandActions(WsPayload) {
+  switch(WsPayload) {
+    case "resetCont":
 
+
+    case "pumpOFF":
+
+
+    case "pumpON":
+
+
+    case "servoPosChange":
+
+
+    case else:
+      Serial.println (wsPayload);
+      wsPayload="";
+      break; 
+}
+}
+//--------------------------------------------------------------------------//
 void setup(void)
 { 
     pinMode(2,OUTPUT);

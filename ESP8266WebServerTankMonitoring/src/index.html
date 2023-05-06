@@ -1399,7 +1399,6 @@ function btnchangeServoPosition() {
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
 }
-}
 
 function btnselectPumpON() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
@@ -1409,10 +1408,9 @@ function btnselectPumpON() {
   document.getElementsById("txBuff")=="";
 }
 }
-    
-function btnselectPumpOff() {
+btnselectPumpOFF() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
-   document.getElementsById("txBuff").value=="pumpOff";
+   document.getElementsById("txBuff").value=="pumpOFF";
   Socket.send(document.getElementById("txBuff").value);
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
   document.getElementsById("txBuff")=="";
