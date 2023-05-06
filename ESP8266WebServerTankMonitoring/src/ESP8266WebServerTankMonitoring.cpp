@@ -2098,9 +2098,10 @@ void processData() {
  } 
  if (wsPayload.length()> 0) {
   //Serial.print("Length of wsPayload: ") && Serial.println(wsPayload.length());  
+  clientCommandActions(wsPayload);
   //Serial.println();
-  Serial.println(wsPayload);
-  wsPayload="";
+  //Serial.println(wsPayload);
+  //wsPayload="";
  }
  if (wsConnected==1 && connCount==0) {
    Serial.println("ClientSocket Connected!");
