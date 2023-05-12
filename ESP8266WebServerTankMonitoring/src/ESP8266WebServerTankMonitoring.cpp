@@ -2127,7 +2127,7 @@ void handleWebRequests(){
   Serial.println(msg);
 }
 //------------------------------------------------------------------------//
-void clientCommandActions(WsPayload) {
+void clientCommandActions(wsPayload) {
   switch(WsPayload) {
     case "resetCont":
 

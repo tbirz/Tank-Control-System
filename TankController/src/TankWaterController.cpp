@@ -2041,7 +2041,6 @@ void getTankDetails() {
   void getAlarmStatus();
 }
 //---------------------------------------------------------------------------------
-
 void updateTankLevel (float rxPercentageLevel, uint16_t xPosRectStart, uint16_t yPosRectStart, uint16_t rectWidth, float ptr, uint16_t txtSpace) {
 
   if (currentPage == 3) { //tank page
