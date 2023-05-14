@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**","C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/include",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/src",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Servo/src",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/MCUFRIEND_kbv",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/MCUFRIEND_kbv/utility",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Adafruit GFX Library",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/avr-debugger/avr8-stub",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Adafruit PWM Servo Driver Library",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Adafruit TouchScreen",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/RTClib/src",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Adafruit BusIO",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "C:/Users/tbirz/Projects/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/SD",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/variants/mega",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "C:/Users/tbirz/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                ""
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ]
+        }
+    ],
+    "version": 4
+}
