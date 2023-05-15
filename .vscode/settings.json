@@ -1,4 +1,5 @@
 {
     "cmake.sourceDirectory": "C:/Users/tbirz/Projects/Tank Control System/Github/Tank-Control-System/TankController/.pio/libdeps/megaatmega2560/Unity",
-    "livePreview.defaultPreviewPath": "/ESP8266WebServerTankMonitoring/src/index.html"
+    "livePreview.defaultPreviewPath": "/ESP8266WebServerTankMonitoring/src/index.html",
+    "C_Cpp.default.compilerPath": ""
 }
