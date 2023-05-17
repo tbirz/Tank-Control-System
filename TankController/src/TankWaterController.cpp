@@ -2353,7 +2353,7 @@ bool serialSetup() {
     }    Serial.print("Serial monitor available?....");
     if (Serial) {
       Serial.println("Serial0 OK");
-      SerialOk = true;
+      serialOk = true;
     }
     while (!Serial1) {
       Serial.print("Serial1 Not Connected "); // wait for serial port to connect. Needed for native USB port only
@@ -2363,7 +2363,7 @@ bool serialSetup() {
     if (Serial1) {
       Serial1.write("AT+DEFAULT");
       Serial.println("OK");
-      SerialOk = true;
+      serialOk = true;
     }
     else {
       Serial.println("HC-12 (Serial1) Not Available");
