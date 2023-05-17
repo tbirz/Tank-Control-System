@@ -2345,13 +2345,15 @@ void showSupplyVoltages() {
 }
 //-------------------------------------------------------------//
 bool serialSetup() {
+  bool serialOK = false;
 
   if (serialSetupCount == 0) {
     while (!Serial) {
       Serial.print("Serial0 Not Connected "); ; // wait for serial port to connect. Needed for native USB port only
     }    Serial.print("Serial monitor available?....");
     if (Serial) {
-      Serial.println("OK");
+      Serial.println("Serial0 OK");
+      SerialOk = true;
     }
     while (!Serial1) {
       Serial.print("Serial1 Not Connected "); // wait for serial port to connect. Needed for native USB port only
@@ -2361,10 +2363,11 @@ bool serialSetup() {
     if (Serial1) {
       Serial1.write("AT+DEFAULT");
       Serial.println("OK");
+      SerialOk = true;
     }
     else {
       Serial.println("HC-12 (Serial1) Not Available");
-      return false;
+      serialOk = false;
     }
 
     while (!Serial2) {
@@ -2375,21 +2378,24 @@ bool serialSetup() {
     Serial.print("Web Serial (Serial2) link available?....");
     if (Serial2) {
       serialWifiFound = true;
-      Serial.println("OK");
+      Serial.println("Web Serial (Serial2 OK");
+      serialOK = true;
     }
     else {
       Serial.println(F("Web Serial (Serial2) link NOT available... "));
       serialWifiFound = false;
+      serialOK = false;
     }
 
     serialSetupCount = 1;
   }
-  return true;
+  return serialOK;
 }
 //-------------------------------------------------------------//
 bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicatorsArraySize) {
   const char startByte = '<';
   const char stopByte = '>';
+  bool controllerIndicatorsSent = false;
   //const char heartBeat = 'H';
   Serial.println();
   Serial.println("Controller Indicators to be sent to the WebPage: ");
@@ -2409,18 +2415,20 @@ bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicat
     Serial2.flush(); //clear Tx buffer;
     Serial.println(F("Controller Indicators sent to WebPage: "));
     Serial.println();
-    return true;
+    controllerIndicatorsSent = true;
   }
   else {
     Serial.println(F("No Controller Indicators sent to the WebPage"));
     Serial.println();
-    return false;
+    controllerIndicatorsSent = false;
   }
+  return controllerIndicatorsSent;
 }
 //-------------------------------------------------------------//
 bool sendControllerVoltages (String contVolValue[], uint16_t controllerVoltagesArraySize) {
   const char startByte = '<';
   const char stopByte = '>';
+  bool controllerVoltagesSent = false;
 
   Serial.println("Controller Voltages to be sent to the WebPage: ");
   Serial.print(startByte);
@@ -2436,19 +2444,20 @@ bool sendControllerVoltages (String contVolValue[], uint16_t controllerVoltagesA
     Serial2.flush(); //clear Tx buffer;
     Serial.println(F("Controller Voltages sent to the WebPage: "));
     Serial.println();
-    return true;
+    controllerVoltagesSent=true;
   }
   else {
     Serial.println(F("No Controller Voltages sent to the WebPage"));
     Serial.println();
-    return false;
+   controllerVoltagesSent=false;
   }
-  return true;
+  return controllerVoltagesSent;
 }
 //-------------------------------------------------------------//
 bool sendSensorData(char* buffer, byte idx) {
   const char startByte = '<';
   const char stopByte = '>';
+  bool sensorDataSent = false;
 
   Serial.println(F("Sensor Data to be sent to the WebPage: "));
   if (Serial2 && idx > 0) {
@@ -2465,13 +2474,14 @@ bool sendSensorData(char* buffer, byte idx) {
     Serial2.flush(); //clear Tx buffer
     Serial.println(F("Sensor Data sent to the WebPage"));
     Serial.println();
-    return true;
+    sensorDataSent=true;
   }
   else {
     Serial.println(F("No Sensor Data sent to the WebPage"));
     Serial.println();
-    return false;
+    sensorDataSent=false;
   }
+  return sensorDataSent;
 }
 //-------------------------------------------------------------//
 bool processSensorData(char* buffer, byte idxData) {
@@ -2629,7 +2639,6 @@ bool processSensorData(char* buffer, byte idxData) {
   float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, uint16_t rxRefillSetPoint, uint16_t rxFullSetPoint, uint16_t rxTankHeight);
 
   if (rxActualLevel > 0) {
-    return true;
     isRxActualLevel = true;
   }
   return isRxActualLevel;
@@ -2640,6 +2649,7 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
   const char stopByte = '>';
   static byte index = 0;
   String junk = "";
+  bool isRxSensorData = false;
 
   if (serialSetup() == true) {
     digitalWrite(radioLinkOnLED, HIGH);
@@ -2671,13 +2681,15 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
         }
       }
       junk = Serial1.read();
+      isRXSensorData=true
     }
     else {
       Serial.println();
       Serial.println("Serial1 NOT available to rx data.");
+      isRxSensorData = false;
     }
   }
-  return true;
+  return isRxSensorData;
 }
 //-------------------------------------------------------------//
 void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight) {
@@ -2745,8 +2757,6 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     digitalWrite(tankFull, HIGH);
     digitalWrite(tankLevelOK, HIGH);
     digitalWrite(pumpRunning, LOW);
-
-    return rxActualLevel;
   }
   else if (rxActualLevel <= (rxFullSetPoint + fullOffset) && digitalRead(pumpRunning) == LOW) { // Tank water level is full (<=rxFullSetPoint with pump stopped)
     void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight);
@@ -2755,8 +2765,6 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     digitalWrite(tankFull, HIGH);
     digitalWrite(tankLevelOK, HIGH);
     digitalWrite(pumpRunning, LOW);
-
-    return rxActualLevel;
   }
   else if (rxActualLevel > rxFullSetPoint && rxActualLevel < rxRefillSetPoint) { //water in tank, level between rxFullSetPoint & rxRefillSetPoint
     void PrintCurrentRxedValues(float rxActualLevel, float rxPercentageLevel, float rxRefillSetPoint, float rxFullSetPoint, float rxTankHeight);
@@ -2777,7 +2785,6 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
         }
         Serial.println();
         Serial.println("-----------------------------------------------");
-        return rxActualLevel;
     }
   }
   else if (rxActualLevel > rxRefillSetPoint && rxActualLevel < rxTankHeight)  {  //tank is at low to empty mark >=tankLow & <= tankHeight & not in bypass mode
@@ -2800,9 +2807,7 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     }
     Serial.println();
     Serial.println("-----------------------------------------------");
-    return rxActualLevel;
   }
-
   else if (rxActualLevel > rxTankHeight || rxActualLevel <= rxFullSetPoint - readErrorTolerance) { //error notification if level >rxTankHeight or <=rxFullSetPoint
     Serial.println(F("--------------Erroneous Water Level Reading."));
     Serial.print("--------------")&& Serial.println(rxActualLevel);
@@ -2810,7 +2815,6 @@ float tankLevelCheck(float rxActualLevel, float rxPercentageLevel, float rxRefil
     // digitalWrite(alarmLED, HIGH);
     digitalWrite(pumpRunning, LOW);
     Serial.println(F("-----------------------------------------------"));
-    return rxActualLevel;
   }
   else if (digitalRead(modeAuto) == HIGH && digitalRead(modeManual) == HIGH) {
     digitalWrite(tankFilling, LOW);
@@ -3100,12 +3104,15 @@ uint16_t angleToPulse(uint16_t ang) {
   return pulse;
 }
 //-------------------------------------------------------------//
-boolean servoChangeToTank() {
+bool servoChangeToTank() {
   const uint16_t ang90 = 90;
   const uint16_t ang0 = 0;
   unsigned long servo1PreviousMillis = 0;
   unsigned long servo2PreviousMillis = 0;
   unsigned long interval = 15000;
+  bool servo1Failed = false;
+  bool servo2Failed = false;
+  bool tankConnected = false;
 
   if (digitalRead(pumpRunning) == LOW && boolean(tankConnected) == false) {
     digitalWrite(servosRunningLED, HIGH);
@@ -3146,14 +3153,14 @@ boolean servoChangeToTank() {
     }
     if (servo1Failed == true || servo2Failed == true) {
       contIndValue[6] = "s0"; //servos not running
-      return tankConnected = false;
       Serial.print("Servos failed to operate Correctly!");
+      tankConnected = false;
     }
     else if (servo1Failed == false && servo2Failed == false)
       contIndValue[6] = "s0";  //servos not running
     digitalWrite(servosRunningLED, LOW);
     Serial.print("Servos operation completed Successfully!");
-    return tankConnected = true;
+    tankConnected = true;
   }
   //digitalWrite(servosRunningLED, LOW);
   return tankConnected;
