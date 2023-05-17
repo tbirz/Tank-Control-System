@@ -2345,7 +2345,7 @@ void showSupplyVoltages() {
 }
 //-------------------------------------------------------------//
 bool serialSetup() {
-  bool serialOK = false;
+  bool setupOK = false;
 
   if (serialSetupCount == 0) {
     while (!Serial) {
@@ -2353,7 +2353,7 @@ bool serialSetup() {
     }    Serial.print("Serial monitor available?....");
     if (Serial) {
       Serial.println("Serial0 OK");
-      serialOk = true;
+      setupOK=true;
     }
     while (!Serial1) {
       Serial.print("Serial1 Not Connected "); // wait for serial port to connect. Needed for native USB port only
@@ -2363,11 +2363,11 @@ bool serialSetup() {
     if (Serial1) {
       Serial1.write("AT+DEFAULT");
       Serial.println("OK");
-      serialOk = true;
+      setupOK = true;
     }
     else {
       Serial.println("HC-12 (Serial1) Not Available");
-      serialOk = false;
+      setupOK = false;
     }
 
     while (!Serial2) {
@@ -2378,18 +2378,18 @@ bool serialSetup() {
     Serial.print("Web Serial (Serial2) link available?....");
     if (Serial2) {
       serialWifiFound = true;
-      Serial.println("Web Serial (Serial2 OK");
-      serialOK = true;
+      Serial.println("Web Serial (Serial2) OK");
+      setupOK = true;
     }
     else {
       Serial.println(F("Web Serial (Serial2) link NOT available... "));
       serialWifiFound = false;
-      serialOK = false;
+      setupOK = false;
     }
 
     serialSetupCount = 1;
   }
-  return serialOK;
+  return setupOK;
 }
 //-------------------------------------------------------------//
 bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicatorsArraySize) {
@@ -2649,11 +2649,11 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
   const char stopByte = '>';
   static byte index = 0;
   String junk = "";
-  bool isRxSensorData = false;
+  bool isRxSensorData=false;
 
   if (serialSetup() == true) {
     digitalWrite(radioLinkOnLED, HIGH);
-    if (Serial1.available()) {
+    if (Serial1.available() == true) {
       Serial.println();
       Serial.println("Serial1 available to rx data.");
 
@@ -2674,6 +2674,7 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
         else { // otherwise
           buffer[index + 1] = inChar; // put the character into our array
           index++; // and move to the next key in the array
+          isRxSensorData=true;
         }
         if (index >= maxBuffer) {
           index = 0;
@@ -2681,12 +2682,12 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
         }
       }
       junk = Serial1.read();
-      isRXSensorData=true
+      Serial.print("Junk: ") && Serial.println(junk);
     }
     else {
       Serial.println();
       Serial.println("Serial1 NOT available to rx data.");
-      isRxSensorData = false;
+      isRxSensorData=false;
     }
   }
   return isRxSensorData;
