@@ -2255,18 +2255,18 @@ void setup(void)
   WiFiManager wifiManager;
   
   // Uncomment and run it once, if you want to erase all the stored information
-  //wifiManager.resetSettings();
+  wifiManager.resetSettings();
   
   // set custom ip for portal
-  //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+  //wifiManager.setAPConfig(IPAddress(192,168,99,239), IPAddress(192,168,99,1), IPAddress(255,255,255,0));
 
   // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
   // and goes into a blocking loop awaiting configuration
-  wifiManager.autoConnect("AutoConnectAP");
+  //wifiManager.autoConnect("AutoConnectAP");
   // or use this for auto generated name ESP + ChipID
-  //wifiManager.autoConnect();
+  wifiManager.autoConnect();
   
   // if you get here you have connected to the WiFi
   Serial.println("Connected.");
