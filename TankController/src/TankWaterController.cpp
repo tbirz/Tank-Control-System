@@ -2344,72 +2344,41 @@ void showSupplyVoltages() {
   void getDCVoltageActuals();
 }
 //-------------------------------------------------------------//
-bool serialSetup() {
-  bool isSerial0 = false;
-  bool isSerial1 = false;
-  bool isSerial2 = false;
+void initialiseSerialPorts() {
+  Serial.begin(baud);  //Serial Monitor
+  Serial.println("Serial Monitor Started (Serial0) OK");
+  Serial.println();
+  Serial1.begin(baud); // HC-12 radio Serial
+  Serial1.write("AT+DEFAULT");
+  Serial.println("HC-12 Started (Serial1) OK");
+  Serial.println();
+  Serial2.begin(baud); // Web Serial for ESP8266
+  Serial.println("Web Serial Started (Serial2) OK");
+  Serial.println();
+}
 
-  if (serialSetupCount == 0) {
+//-------------------------------------------------------------//
+void serialStatusCheck() {
+
+
     while (!Serial) {
       Serial.print("Serial0 Not Connected "); ; // wait for serial port to connect. Needed for native USB port only
-    }    Serial.print("Serial monitor available?....");
-    if (Serial) {
-      Serial.println("Serial0 OK");
-      isSerial0=true;
-      //Serial.println("Serial0-1: " && isSerial0);
-    }
-    else {
-      Serial.println("Serial0 Not Available....");
-      isSerial0=false;
-      //Serial.println("Serial0-2: " && isSerial0);
-    }
+    } // end while
+    Serial.print("Serial0 Connected OK");
     while (!Serial1) {
       Serial.print("Serial1 Not Connected "); // wait for serial port to connect. Needed for native USB port only
     }
-    Serial.print("HC-12 (Serial1) available?....");
-    Serial1.begin(baud);
-   // if (Serial1) {
-      Serial1.write("AT+DEFAULT");
-      Serial.println("HC-12 Serial1 OK");
-      isSerial1 = true;
-      //Serial.println("Serial1-1: " && isSerial1);
-   // }
-   // else {
-  //    Serial.println("HC-12 (Serial1) Not Available....");
-   //   isSerial1 = false;
-     // Serial.println("Serial1-2: " && isSerial1);
-     
-   // }
+    Serial.print("Serial1 (HC12) Connected OK");
+  
 
     while (!Serial2) {
       Serial.print("Serial2 Not Connected "); // wait for serial port to connect. Needed for native USB port only
-      serialWifiFound = false;
-    }
-    Serial2.begin(baud); //Web Serial, connected to ESP8266
-    Serial.print("Web Serial (Serial2) link available?....");
-    //if (Serial2) {
-      serialWifiFound = true;
-      Serial.println("Web Serial Serial2 OK");
-      isSerial2 = true;
-     // Serial.println("Serial2-1: " && isSerial2);
-    //}
-   // else {
-    //  Serial.println(F("Web Serial (Serial2) link NOT available..."));
-     // serialWifiFound = false;
-     // isSerial2 = false;
-     // Serial.println("Serial2-1: " && isSerial2);
-    //}
+     // serialWifiFound = false    
+      }
+    Serial.print("Serial2 (ESP8266) connected OK"); //Web Serial, connected to ESP8266
+     // serialWifiFound = true;
+    
 
-    serialSetupCount = 1;
-  }
-if ((isSerial0 && isSerial1 && isSerial2) == true) {
-  Serial.println("All Used Serials Setup OK");
-  return true;
-}
-else {
- // Serial.println("serialSetup() Failed: ");
-  return false;
-}
 }
 //-------------------------------------------------------------//
 bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicatorsArraySize) {
@@ -2418,7 +2387,7 @@ bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicat
   bool controllerIndicatorsSent = false;
   //const char heartBeat = 'H';
   Serial.println();
-  Serial.println("Controller Indicators to be sent to the WebPage: ");
+  Serial.println("Controller Indicators to be sent to the ESP8266: ");
   
   if (Serial2) {
     //Serial2.print(heartBeat);
@@ -2433,12 +2402,12 @@ bool sendControllerIndicators (String contIndValue[], uint16_t controllerIndicat
     Serial.print(stopByte);
     Serial.println();
     Serial2.flush(); //clear Tx buffer;
-    Serial.println(F("Controller Indicators sent to WebPage: "));
+    Serial.println(F("Controller Indicators sent to ESP8266: "));
     Serial.println();
     controllerIndicatorsSent = true;
   }
   else {
-    Serial.println(F("No Controller Indicators sent to the WebPage"));
+    Serial.println(F("No Controller Indicators sent to the ESP8266"));
     Serial.println();
     controllerIndicatorsSent = false;
   }
@@ -2450,7 +2419,7 @@ bool sendControllerVoltages (String contVolValue[], uint16_t controllerVoltagesA
   const char stopByte = '>';
   bool controllerVoltagesSent = false;
 
-  Serial.println("Controller Voltages to be sent to the WebPage: ");
+  Serial.println("Controller Voltages to be sent to the ESP8266: ");
   Serial.print(startByte);
   Serial2.print(startByte);
   if (Serial2) {
@@ -2462,12 +2431,12 @@ bool sendControllerVoltages (String contVolValue[], uint16_t controllerVoltagesA
     Serial.print(stopByte);
     Serial.println();
     Serial2.flush(); //clear Tx buffer;
-    Serial.println(F("Controller Voltages sent to the WebPage: "));
+    Serial.println(F("Controller Voltages sent to the ESP8266: "));
     Serial.println();
     controllerVoltagesSent=true;
   }
   else {
-    Serial.println(F("No Controller Voltages sent to the WebPage"));
+    Serial.println(F("No Controller Voltages sent to the ESP8266"));
     Serial.println();
    controllerVoltagesSent=false;
   }
@@ -2479,7 +2448,7 @@ bool sendSensorData(char* buffer, byte idx) {
   const char stopByte = '>';
   bool sensorDataSent = false;
 
-  Serial.println(F("Sensor Data to be sent to the WebPage: "));
+  Serial.println(F("Sensor Data to be sent to the ESP8266: "));
   if (Serial2 && idx > 0) {
     Serial2.print(startByte);
     Serial.print(startByte);
@@ -2492,12 +2461,12 @@ bool sendSensorData(char* buffer, byte idx) {
     Serial.println(stopByte);
 
     Serial2.flush(); //clear Tx buffer
-    Serial.println(F("Sensor Data sent to the WebPage"));
+    Serial.println(F("Sensor Data sent to the ESP8266"));
     Serial.println();
     sensorDataSent=true;
   }
   else {
-    Serial.println(F("No Sensor Data sent to the WebPage"));
+    Serial.println(F("No Sensor Data sent to the ESP8266"));
     Serial.println();
     sensorDataSent=false;
   }
@@ -2671,14 +2640,11 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
   String junk = "";
   bool isRxSensorData=false;
 
-//Serial.println("serialSetup: ") && Serial.println(serialSetup());
- while ((serialSetup()) == true) {
-       // Serial.println("Serial1.Available: " && Serial1.available());
-   digitalWrite(radioLinkOnLED, HIGH);
+
     if (Serial1.available() > 0) {
       digitalWrite(radioLinkOnLED, HIGH);
 
-      Serial.println("Serial1 available to rx data.");
+     // Serial.println("Serial1 available to rx data.");
 
       while (Serial1.available() > 0 ) {
         char inChar = Serial1.read();
@@ -2686,10 +2652,10 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
         if (inChar == startByte) { // If start byte is received
           index = 0;
         } else if (inChar == stopByte) { // If end byte is received
-          if (sendSensorData(buffer, index) == true) { // send Data to WebPage
+          if (sendSensorData(buffer, index) == true) { // send Data to ESP8266
            processSensorData(buffer, index); // and process the data
           } else {
-            //  Serial.println("Webdata not Sent!");
+            //  Serial.println("ESP8266 not Sent!");
           }
           buffer[index] = '\0'; // then null terminate for end of data
           index = 0; // this isn't necessary, but helps limit overflow
@@ -2705,16 +2671,9 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
         }
       }
       junk = Serial1.read();
-      Serial.print("Junk: ") && Serial.println(junk);
     }
-    //else {
-     // Serial.println();
-     // Serial.println("Serial1 NOT available to rx data.");
-     // isRxSensorData=false;
-    //}
-  }
-
-    //Serial.println(isRxSensorData);
+else {isRxSensorData=false;
+}
   return isRxSensorData;
 }
 //-------------------------------------------------------------//
@@ -3452,8 +3411,20 @@ void setup() {
  //debug_init();
 
   /****Serial*****/
-  Serial.begin(baud);
-  delay(50);
+
+  Serial.begin(baud);  //Serial Monitor
+  Serial.println();
+  Serial.println("Serial Monitor Started (Serial0) OK");
+  Serial.println();
+  Serial1.begin(baud); // HC-12 radio Serial
+  Serial1.write("AT+DEFAULT");
+  Serial.println("HC-12 Started (Serial1) OK");
+  Serial.println("HC-12 Initialized OK");
+  Serial.println();
+  Serial2.begin(baud); // ESP8266 Serial  
+  Serial.println("Web Serial Started (Serial2) OK");
+  Serial.println();
+  delay (50);
 
   Serial.println(F("========================================"));
   Serial.println(F("PUMP CONTROLLER SERIAL OUTPUT"));
@@ -3470,9 +3441,7 @@ void setup() {
   tft.setRotation(Orientation);
   tft.fillScreen(Black);
 
-  bool serialSetup();
-
-  void showSplash();
+  void showSplash(); //show splash screen
 
   /****Controller*****/
 
@@ -3600,7 +3569,7 @@ void setup() {
   pinMode(ledTest, INPUT);
 
   void ledTestCheck();
-  //Serial.println("serialSetup: " && serialSetup());
+
   do {
     //Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
   } while (rxSensorData() == false);
@@ -3609,8 +3578,10 @@ void setup() {
 //LOOP
 /*****************************************************************************************************************************************/
 void loop() {
-  if (boolean(initCompleted) == false) {
-    boolean servoChangeFromTank();
+
+void serialStatusCheck();
+  if (bool(initCompleted) == false) {
+    bool servoChangeFromTank();
     void showMainMenu();
     initCompleted = true;
   }
