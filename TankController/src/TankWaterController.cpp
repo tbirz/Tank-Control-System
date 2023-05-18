@@ -2356,30 +2356,30 @@ bool serialSetup() {
     if (Serial) {
       Serial.println("Serial0 OK");
       isSerial0=true;
-      Serial.println("Serial0-1: " && isSerial0);
+      //Serial.println("Serial0-1: " && isSerial0);
     }
     else {
       Serial.println("Serial0 Not Available....");
       isSerial0=false;
-      Serial.println("Serial0-2: " && isSerial0);
+      //Serial.println("Serial0-2: " && isSerial0);
     }
     while (!Serial1) {
       Serial.print("Serial1 Not Connected "); // wait for serial port to connect. Needed for native USB port only
     }
     Serial.print("HC-12 (Serial1) available?....");
     Serial1.begin(baud);
-    if (Serial1) {
+   // if (Serial1) {
       Serial1.write("AT+DEFAULT");
       Serial.println("HC-12 Serial1 OK");
       isSerial1 = true;
-      Serial.println("Serial1-1: " && isSerial1);
-    }
-    else {
-      Serial.println("HC-12 (Serial1) Not Available....");
-      isSerial1 = false;
-      Serial.println("Serial1-2: " && isSerial1);
+      //Serial.println("Serial1-1: " && isSerial1);
+   // }
+   // else {
+  //    Serial.println("HC-12 (Serial1) Not Available....");
+   //   isSerial1 = false;
+     // Serial.println("Serial1-2: " && isSerial1);
      
-    }
+   // }
 
     while (!Serial2) {
       Serial.print("Serial2 Not Connected "); // wait for serial port to connect. Needed for native USB port only
@@ -2387,19 +2387,18 @@ bool serialSetup() {
     }
     Serial2.begin(baud); //Web Serial, connected to ESP8266
     Serial.print("Web Serial (Serial2) link available?....");
-    if (Serial2) {
+    //if (Serial2) {
       serialWifiFound = true;
       Serial.println("Web Serial Serial2 OK");
       isSerial2 = true;
-      Serial.println("Serial2-1: " && isSerial2);
-    }
-    else {
-      Serial.println(F("Web Serial (Serial2) link NOT available..."));
-      serialWifiFound = false;
-      isSerial2 = false;
-      Serial.println("Serial2-1: " && isSerial2);
-    
-    }
+     // Serial.println("Serial2-1: " && isSerial2);
+    //}
+   // else {
+    //  Serial.println(F("Web Serial (Serial2) link NOT available..."));
+     // serialWifiFound = false;
+     // isSerial2 = false;
+     // Serial.println("Serial2-1: " && isSerial2);
+    //}
 
     serialSetupCount = 1;
   }
@@ -2408,7 +2407,7 @@ if ((isSerial0 && isSerial1 && isSerial2) == true) {
   return true;
 }
 else {
-  //Serial.println("Serial Setup Failed: ") && Serial.println("Serial0: ") && Serial.println(isSerial0) && Serial.println("Serial1: ") && Serial.println(isSerial1) && Serial.println("Serial2: ") && Serial.println(isSerial2); 
+ // Serial.println("serialSetup() Failed: ");
   return false;
 }
 }
@@ -2672,11 +2671,11 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
   String junk = "";
   bool isRxSensorData=false;
 
-// Serial.println("serialSetup: ") && Serial.println(serialSetup());
+//Serial.println("serialSetup: ") && Serial.println(serialSetup());
  while ((serialSetup()) == true) {
-        Serial.println("Serial1.Available: ") && Serial.println(Serial1.available());
+       // Serial.println("Serial1.Available: " && Serial1.available());
    digitalWrite(radioLinkOnLED, HIGH);
-    if (Serial1.available()) {
+    if (Serial1.available() > 0) {
       digitalWrite(radioLinkOnLED, HIGH);
 
       Serial.println("Serial1 available to rx data.");
@@ -2714,6 +2713,8 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
      // isRxSensorData=false;
     //}
   }
+
+    //Serial.println(isRxSensorData);
   return isRxSensorData;
 }
 //-------------------------------------------------------------//
@@ -3618,7 +3619,7 @@ void loop() {
   bool sendControllerIndicators(String contIndValue,  const uint16_t controllerIndicatorsArraySize);
   bool sendControllerVoltages(String contVolValue[], const uint16_t controllerIndicatorsArraySize);
   void getAlarmStatus();
-Serial.println(serialSetup());
+
  bool rxSensorData();
  
 
