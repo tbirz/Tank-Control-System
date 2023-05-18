@@ -564,11 +564,11 @@ $(document).ready(function(){
     <p style="text-align:center; color: navy; font-size:85%;">WS-Status: <span style="color: white; font-size:85%;" id='ws-Status'>Status</span></p>
   </div
 
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="display:none;">
-  <form class="d-none"> 
-   <input class="form-control ml-sm-5" id="rxConsole"  type="text" readonly placeholder="Rx Data (read only)">   
-     <input class="form-control ml-sm-5" "type="text" id="txBuff" placeholder="Enter Control Code" onkeydown="if(event.keyCode == 13) enterPressed();">
-    <input class="btn btn-success ml-sm-2" id="txButt" type="submit" onclick="enterPressed();" value="Submit">
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="display:inline-block" justify-content-center>
+  <form class="form-inline" justify-content-center> 
+   <input class="form-control ml-sm-5" justify-content-center id="rxConsole"  type="text" readonly placeholder="Rx Data (read only)">   
+   <input class="form-control ml-sm-5" justify-content-center type="text" id="txBuff" placeholder="Tx Data" onkeydown="if(event.keyCode == 13) enterPressed();">
+   <input class="btn btn-success ml-sm-2" id="txButt" type="submit" onclick="enterPressed();" value="Send">
   </form> 
 </nav>
 <br>
@@ -607,37 +607,34 @@ $(document).ready(function(){
               </tr>
             </tbody>
         </table>
-
-        <table id="fixedInfo" class="table table-bordered table-sm border border-info">
-          <h6><span class="badge badge-info">Water Tank Static Info</span></h6>
+        <table id="controlFunctions class="table table-bordered table-sm border border-info">
+          <h6><span class="badge badge-info">Select Control Functions</span></h6>
           <thead class="bg-info border border-info">
             <tr class="d-flex">
-              <th class="col-6 border border-info">Description</th>
-              <th class="col-4 border border-info">Value</th>
-              <th class="col-2 border border-info">Unit</th>
             </tr>
           </thead>
           <tbody>
-            <tr id="fixedInfo1" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Tank Height</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="TankHeight">---.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
+            <tr id="controlFunctions1" class="d-flex">
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnspare1()">spare button</button>  
             </tr>
-            <tr id="fixedInfo2" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Refill Set Point</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="RefillSetPoint">---.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
+            <tr id="controlFunctions2" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectresetWebServer()">Reset WebServer</button>  
+              </tr>
+              <tr id="controlFunctions3" class="d-flex">
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOff()">Switch Pump Off</button>
+              </tr>
+              <tr id="controlFunctions4" class="d-flex">
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOn()">Switch Pump On</button>
+              </tr>  
+            <tr id="controlFunctions5" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectchangeServoPosition()">Change Servo(s) Position</button>
             </tr>
-            <tr id="fixedInfo3" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Full Set Point</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="FullSetPoint">--.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">cm</td>
+            <tr id="controlFunctions6" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnresetController()">Reset Controller</button>
             </tr>
-            <tr id="fixedInfo4" class="d-flex">
-              <td class="col-6 font-weight-bold border border-info">Total Capacity (Volume)</td>
-              <td class="col-4 font-weight-bold border border-info"><span id="TotalCapacity">-----.--</span></td>
-              <td class="col-2 font-weight-bold border border-info">Ltrs</td>
-            </tr>
+            <tr id="controlFunctions7" class="d-flex">
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnrefreshPage()">Refresh Page</button>  
+              </tr>
           </tbody>
         </table>
         <table id="popoverRef" class="d-none table-bordered table-sm border border-success">
@@ -790,44 +787,32 @@ $(document).ready(function(){
             <tr id="controllerVoltages1" class="d-flex">
               <td class="col-5 font-weight-bold border border-dark">Control (12v)</td>
               <td class="col-4 font-weight-bold border border-dark"><span id="Controller12v">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-dark">Volts</td>
+              <td class="col-3 font-weight-bold border border-dark">Vdc</td>
             </tr>
             <tr id="controllerVoltages2" class="d-flex">
               <td class="col-5 font-weight-bold border border-dark">Control (7v)</td>
               <td class="col-4 font-weight-bold border border-dark"><span id="Controller7v">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-dark">Volts</td>
+              <td class="col-3 font-weight-bold border border-dark">Vdc</td>
             </tr>
             <tr id="controllerVoltages3" class="d-flex">
               <td class="col-5 font-weight-bold border border-dark">Control (5v)</td>
               <td class="col-4 font-weight-bold border border-dark"><span id="Controller5v">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-dark">Volts</td>
+              <td class="col-3 font-weight-bold border border-dark">Vdc</td>
             </tr>
             <tr id="controllerVoltages4" class="d-flex">
               <td class="col-5 font-weight-bold border border-dark">Control (3v3)</td>
               <td class="col-4 font-weight-bold border border-dark"><span id="Controller3v3">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-dark">Volts</td>
+              <td class="col-3 font-weight-bold border border-dark">Vdc</td>
             </tr>
-          </tbody>
-        </table>
-         <table id="controllerVacVoltages" class="table table-bordered table-sm border border-warning">
-          <h6><span class="badge badge-warning">Controller AC Voltages</span></h6>
-          <thead class="bg-warning border border-warning">
-            <tr class="d-flex border border-warning">
-              <th class="col-5 border border-warning">Voltage</th>
-              <th class="col-4 border border-warning">Value</th>
-              <th class="col-3 border border-warning">Unit</th>
+            <tr id="controllerVoltages5" class="d-flex">
+              <td class="col-5 font-weight-bold border border-dark">Constant (28v)</td>
+              <td class="col-4 font-weight-bold border border-dark"><span id="controllerVacConst">--.--</span></td>
+              <td class="col-3 font-weight-bold border border-dark">Vac</td>
             </tr>
-          </thead>
-          <tbody>
-            <tr id="controllerVacVoltages1" class="d-flex">
-              <td class="col-5 font-weight-bold border border-warning">Constant (28v)</td>
-              <td class="col-4 font-weight-bold border border-warning"><span id="controllerVacConst">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-warning">VAC</td>
-            </tr>
-            <tr id="controllerVacVoltages2" class="d-flex">
-              <td class="col-5 font-weight-bold border border-warning">Switched (28v)</td>
-              <td class="col-4 font-weight-bold border border-warning"><span id="controllerVacSw">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-warning">VAC</td>
+            <tr id="controllerVoltages6" class="d-flex">
+              <td class="col-5 font-weight-bold border border-dark">Switched (28v)</td>
+              <td class="col-4 font-weight-bold border border-dark"><span id="controllerVacSw">--.--</span></td>
+              <td class="col-3 font-weight-bold border border-dark">Vac</td>
             </tr>
           </tbody>
         </table>
@@ -844,16 +829,47 @@ $(document).ready(function(){
             <tr id="remoteSensorVoltages1" class="d-flex">
               <td class="col-5 font-weight-bold border border-secondary">Battery Input (12v)</td>
               <td class="col-4 font-weight-bold border border-secondary"><span id="BatteryVoltageLevel">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-secondary">Volts</td>
+              <td class="col-3 font-weight-bold border border-secondary">Vdc</td>
             </tr>
             <tr id="remoteSensorVoltages2" class="d-flex">
               <td class="col-5 font-weight-bold border border-secondary">Control (5v)</td>
               <td class="col-4 font-weight-bold border border-secondary"><span id="SensorControl5v">--.--</span></td>
-              <td class="col-3 font-weight-bold border border-secondary">Volts</td>
+              <td class="col-3 font-weight-bold border border-secondary">Vdc</td>
             </tr>
           </tbody>
         </table>
-      </div>
+        <table id="fixedInfo" class="table table-bordered table-sm border border-info">
+          <h6><span class="badge badge-info">Water Tank Static Info</span></h6>
+          <thead class="bg-info border border-info">
+            <tr class="d-flex">
+              <th class="col-6 border border-info">Description</th>
+              <th class="col-4 border border-info">Value</th>
+              <th class="col-2 border border-info">Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="fixedInfo1" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Tank Height</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="TankHeight">---.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo2" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Refill Set Point</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="RefillSetPoint">---.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo3" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Full Set Point</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="FullSetPoint">--.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">cm</td>
+            </tr>
+            <tr id="fixedInfo4" class="d-flex">
+              <td class="col-6 font-weight-bold border border-info">Total Capacity (Volume)</td>
+              <td class="col-4 font-weight-bold border border-info"><span id="TotalCapacity">-----.--</span></td>
+              <td class="col-2 font-weight-bold border border-info">Ltrs</td>
+            </tr>
+          </tbody>
+        </div>
     </div>
   </div>
 
@@ -1407,13 +1423,74 @@ function socketErrors() {// Log errors
     console.log('WebSocket Error: ' + e.message);
   } 
 }
-    
+//----------------------------------------------------------------------------
+// Functions for Control Buttons
+//----------------------------------------------------------------------------
+
+function btnSpare1() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="spare1";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+function btnresetWebServer() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="resetWebServer";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+function btnselectPumpON() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpON";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+function btnresetController() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="resetCont";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+function btnchangeServoPosition() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="servoPosChange";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+function btnselectPumpON() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpON";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
+  document.getElementsById("txBuff")=="";
+}
+funtion btnselectPumpOFF() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="pumpOFF";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
+  document.getElementsById("txBuff")=="";
+}
+funtion btnselectrefreshPage() {
+  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
+   document.getElementsById("txBuff").value=="refreshPage";
+  Socket.send(document.getElementById("txBuff").value);
+  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
+  document.getElementsById("txBuff")=="";
+}
+}
+//----------------------------------------------------------------------------
 function enterPressed() {//function for when 'send' button pressed
-   if(Socket.readyState==1) {
+   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
       document.getElementById("txButt").style.color="red"; 
       Socket.send(document.getElementById("txBuff").value); //Send the data from txBuff input to server, to use this function just input the string you want to send.
        //alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
-      document.getElementById("txBuff").value = ""; //clears the texbox after data is sent
+      document.getElementById("txBuff").value = ""; //clears the textbox after data is sent
    }
    else if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
          alert("To submit you must add text!.");
@@ -1785,22 +1862,22 @@ function checkControllerACVoltageLevels() {
 
       //vac Const
     if (valueVacConst >= 23.5 && valueVacConst <= 29.5) {
-        document.getElementById("controllerVacVoltages1").style.backgroundColor = "yellowgreen";
-        document.getElementById("controllerVacVoltages1").style.color = "initial";
+        document.getElementById("controllerVoltages5").style.backgroundColor = "yellowgreen";
+        document.getElementById("controllerVoltages5").style.color = "initial";
       }
       else {
-        document.getElementById("controllerVacVoltages1").style.backgroundColor = "red";
-        document.getElementById("controllerVacVoltages1").style.color = "white";
+        document.getElementById("controllerVoltages5").style.backgroundColor = "red";
+        document.getElementById("controllerVoltages5").style.color = "white";
       }
 
       //vac Switched
       if (valueVacSw >= 23.5 && valueVacSw <= 29.5) {
-        document.getElementById("controllerVacVoltages2").style.backgroundColor = "yellowgreen";
-        document.getElementById("controllerVacVoltages2").style.color = "initial";
+        document.getElementById("controllerVoltages6").style.backgroundColor = "yellowgreen";
+        document.getElementById("controllerVoltages6").style.color = "initial";
       }
       else {
-        document.getElementById("controllerVacVoltages2").style.backgroundColor = "red";
-        document.getElementById("controllerVacVoltages2").style.color = "white";
+        document.getElementById("controllerVoltages6").style.backgroundColor = "red";
+        document.getElementById("controllerVoltages6").style.color = "white";
       }
 }    
 //----------------------------------------------------------------------------
@@ -2098,7 +2175,7 @@ void processData() {
  } 
  if (wsPayload.length()> 0) {
   //Serial.print("Length of wsPayload: ") && Serial.println(wsPayload.length());  
-  clientCommandActions(wsPayload);
+  void clientCommandActions(String);
   //Serial.println();
   //Serial.println(wsPayload);
   //wsPayload="";
@@ -2127,29 +2204,49 @@ void handleWebRequests(){
   Serial.println(msg);
 }
 //------------------------------------------------------------------------//
-void clientCommandActions(wsPayload) {
-  switch(WsPayload) {
-    case "resetCont":
+void clientCommandActions(String wsPayload) {
+//Serial.println(wsPayload);
 
+ if (wsPayload == "resetCont") {
 
-    case "pumpOFF":
+          Serial.println("Resetting Controller.....");
+ }
+  else if (wsPayload == "resetWebServer") {
 
+          Serial.println("Resetting ESP8266 Server.....");
+          ESP.restart();
+ }
+  else if (wsPayload == "pumpOFF") {
 
-    case "pumpON":
+          Serial.println("Turning Off Pump");
+  
+  }
+  else if (wsPayload == "refreshPage") {
 
+          Serial.println("Refreshing Webpage.....");
+  }
+   else if (wsPayload == "pumpON") {  
 
-    case "servoPosChange":
+          Serial.println("Turning On Pump");
 
+   
+   }
+   else if (wsPayload == "servoPosChange") {
 
-    case else:
+    Serial.println("Changing Servo Position");
+
+   }
+   else {
       Serial.println (wsPayload);
       wsPayload="";
-      break; 
-}
-}
+   }
+      
+      }
+
 //--------------------------------------------------------------------------//
 void setup(void)
 { 
+  String wsPayload="";
     pinMode(2,OUTPUT);
    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
