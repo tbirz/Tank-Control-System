@@ -2265,18 +2265,15 @@ void setup(void)
   // here  "AutoConnectAP"
   // and goes into a blocking loop awaiting configuration
   //wifiManager.autoConnect("AutoConnectAP"); //anonymous ap  
-  // or use this for auto generated name ESP + ChipID
-  //wifiManager.autoConnect(); 
+  //wifiManager.autoConnect(); // use this for auto generated name ESP + ChipID
   bool wifiSetupStatus; // variable to hold the status of the wifi connection
- // wifiSetupStatus= wifiManager.autoConnect(); //auto generated AP name from chipid
- // wifiSetupStatus= wifiManager.autoConnect("AutoConnect"); //anonymous ap
-  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","T.b25584$"); //specific ap
+
+  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","325483"); //specific ap
   if (!wifiSetupStatus) {
     Serial.println("Failed to connect");
     ESP.restart();
   } 
   else {
-    //if you get here you have connected to the WiFi    
     Serial.println("Connected.");
   }
    while (!Serial){
