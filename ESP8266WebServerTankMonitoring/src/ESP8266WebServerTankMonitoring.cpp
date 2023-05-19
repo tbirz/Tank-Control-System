@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
-#include <WifiManager.h>  // https://github.com/tzapu/WiFiManager
+#include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
 #include <DNSServer.h>
 #include <WebSocketsServer.h>
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
@@ -2251,27 +2251,35 @@ void setup(void)
    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
      // WiFiManager
+     WiFi.mode (WIFI_STA);
   // Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
   
   // Uncomment and run it once, if you want to erase all the stored information
   //wifiManager.resetSettings();
   
-  // set custom ip for portal
-  //wifiManager.setAPConfig(IPAddress(192,168,99,239), IPAddress(192,168,99,1), IPAddress(255,255,255,0));
+
 
   // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
   // and goes into a blocking loop awaiting configuration
-  wifiManager.autoConnect("AutoConnectAP");
+  //wifiManager.autoConnect("AutoConnectAP"); //anonymous ap  
   // or use this for auto generated name ESP + ChipID
-  //wifiManager.autoConnect();
-  
-  // if you get here you have connected to the WiFi
-  Serial.println("Connected.");
- 
-    while (!Serial){
+  //wifiManager.autoConnect(); 
+  bool wifiSetupStatus; // variable to hold the status of the wifi connection
+ // wifiSetupStatus= wifiManager.autoConnect(); //auto generated AP name from chipid
+ // wifiSetupStatus= wifiManager.autoConnect("AutoConnect"); //anonymous ap
+  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","T.b25584$"); //specific ap
+  if (!wifiSetupStatus) {
+    Serial.println("Failed to connect");
+    ESP.restart();
+  } 
+  else {
+    //if you get here you have connected to the WiFi    
+    Serial.println("Connected.");
+  }
+   while (!Serial){
         ; // wait for serial port to connect. Needed for Leonardo only
     }
      server.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
