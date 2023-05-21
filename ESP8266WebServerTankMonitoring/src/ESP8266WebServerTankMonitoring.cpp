@@ -8,6 +8,24 @@ ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage the websocket connection
 
 
+/*
+//Static IP address configuration for hotspot
+IPAddress ip(192, 168, 99, 117); //ESP static ip
+IPAddress gateway(192, 168, 43, 1);   //IP Address of your WiFi Router (Gateway)
+IPAddress subnet(255, 255, 255, 0);  //Subnet mask
+IPAddress dns(8, 8, 8, 8);  //DNS
+
+
+//Enter your Wi-Fi SSID and PASSWORD
+const char* ssid     = "Tigerland";
+const char* password = "1980premiers";
+const char* deviceName = "ESP8266";
+*/
+
+
+
+
+
 int connCount = 0; //connCount is used to count the number of connections to the web server
 int serialSwapped = 0; //serialSwapped is used to indicate that the serial port has been swapped
 int wsConnected = 0; //wsConnected is used to indicate that the websocket has been connected
@@ -56,7 +74,7 @@ unsigned int count = 0;
 const byte maxBuffer = 64;
 //use the buffer to capture incoming serial data
 //define buffer as a static array to avoid stack overflow errors when using dynamic memory allocation (new) 
-char  buffer[maxBuffer-1];
+char buffer[maxBuffer-1];
 //webData is the data that is sent to the web page
 char webData[maxBuffer];
 //idxData is the index of the data in the buffer
@@ -1974,7 +1992,7 @@ function checkPercentageLevel() {
                 tblActuals.rows[i].style.color = '' + tblActuals.rows[1].style.color;
              } 
            }
-      }                             
+       }                             
 } 
 //---------------------------------------------------------------------------- 
  function checkTemperatureLevel() {  
@@ -2244,23 +2262,63 @@ void clientCommandActions(String wsPayload) {
       }
 
 //--------------------------------------------------------------------------//
-void setup(void)
-{ 
+void setup(void){ 
+
   String wsPayload="";
     pinMode(2,OUTPUT);
    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
+
+/*
+//  int idx=0;
+//int idxCount=0; 
+WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
+
+  WiFi.hostname(deviceName);      // DHCP Hostname (useful for finding device for static lease)
+    Serial.println();
+    Serial.print("Device: ") && Serial.println(deviceName);
+   Serial.print("MAC: ") && Serial.println(WiFi.macAddress());
+  WiFi.config(ip, gateway, subnet, dns);
+    delay(100);
+
+  WiFi.mode(WIFI_STA);        // Connect to your wifi
+ WiFi.begin(ssid, password);// Start the Wi-Fi services
+  Serial.print("Connecting to: ") && Serial.println(ssid);
+  
+    while (WiFi.status() != WL_CONNECTED) { // Wait for WiFi to connect 
+    if (idxCount==250) {
+    Serial.println();
+    Serial.println("Failed to connect to router. Resetting.....");
+    ESP.restart();
+    }
+    if(idx==50) {
+     Serial.println(); 
+     idx=0;
+    }
+    Serial.print(".");
+    delay(100);
+    idx++;
+    idxCount++;
+    } 
+    idxCount=0;
+    idx=0;   
+    
+  Serial.println();  
+  Serial.println("Connected to: "+String(ssid));
+  Serial.print("Using IP address: ");
+  Serial.println(WiFi.localIP());  //IP address assigned to your ESP 
+
+*/
+
+
      // WiFiManager
-     WiFi.mode (WIFI_STA);
+   WiFi.mode (WIFI_STA);
   // Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
   
   // Uncomment and run it once, if you want to erase all the stored information
   //wifiManager.resetSettings();
-  
-
-
-  // fetches ssid and pass from eeprom and tries to connect
+   // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
   // and goes into a blocking loop awaiting configuration
@@ -2276,9 +2334,12 @@ void setup(void)
   else {
     Serial.println("Connected.");
   }
-   while (!Serial){
-        ; // wait for serial port to connect. Needed for Leonardo only
-    }
+  delay(500);
+   //while (!Serial){
+   // ;
+    //}
+    
+
      server.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
      server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
      server.begin();
@@ -2297,7 +2358,7 @@ void setup(void)
 
 }//end SETUP
  
-void loop()
+void loop(void)
 {
     server.handleClient();  // Keep checking for a client connection
     webSocket.loop();
