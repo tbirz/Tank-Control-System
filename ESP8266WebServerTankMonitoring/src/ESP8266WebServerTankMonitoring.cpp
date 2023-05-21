@@ -1,4 +1,4 @@
-
+#include <WiFiClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
@@ -1452,6 +1452,7 @@ function btnSpare1() {
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
 }
+}
 function btnresetWebServer() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetWebServer";
@@ -1459,12 +1460,6 @@ function btnresetWebServer() {
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
 }
-function btnselectPumpON() {
-  if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
-   document.getElementsById("txBuff").value=="pumpON";
-  Socket.send(document.getElementById("txBuff").value);
-  alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
-  document.getElementsById("txBuff")=="";
 }
 function btnresetController() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
@@ -1473,12 +1468,14 @@ function btnresetController() {
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
 }
+}
 function btnchangeServoPosition() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="servoPosChange";
   Socket.send(document.getElementById("txBuff").value);
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
+}
 }
 function btnselectPumpON() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
@@ -1487,12 +1484,14 @@ function btnselectPumpON() {
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted"); 
   document.getElementsById("txBuff")=="";
 }
+}
 funtion btnselectPumpOFF() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpOFF";
   Socket.send(document.getElementById("txBuff").value);
   alert("Submitted code: " && document.getElementById("txBuff").value && " has been transmitted");
   document.getElementsById("txBuff")=="";
+}
 }
 funtion btnselectrefreshPage() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
