@@ -1,5 +1,6 @@
 #include <Arduino.h>
-//#include <avr8-stub.h>
+#include <avr8-stub.h>
+#define DMX_USE_PORT0
 /*******Controller**************/
 #include <SD.h>
 #include <Servo.h>
@@ -2644,7 +2645,7 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
     if (Serial1.available() > 0) {
       digitalWrite(radioLinkOnLED, HIGH);
 
-     // Serial.println("Serial1 available to rx data.");
+     Serial.println("Serial1 available to rx data.");
 
       while (Serial1.available() > 0 ) {
         char inChar = Serial1.read();
@@ -2672,8 +2673,8 @@ bool rxSensorData() { //read data out of buffer of serial radio and transmit to 
       }
       junk = Serial1.read();
     }
-else {isRxSensorData=false;
-}
+//else {isRxSensorData=false;
+//}
   return isRxSensorData;
 }
 //-------------------------------------------------------------//
@@ -3023,7 +3024,7 @@ void autoMode() {
   }
   if (digitalRead(modeAuto) == LOW && digitalRead(modeManual) == LOW) {
     Serial.println(F("Auto Mode - Switch Fault Needs Investigation."));
-    return;
+   // return;
   }
 }
 //-------------------------------------------------------------//
@@ -3048,7 +3049,7 @@ void manualMode() {
 
   if (digitalRead(modeAuto) == LOW && digitalRead(modeManual) == LOW) {
     Serial.println(F("Manual Mode - Switch Fault Needs Investigation."));
-    return;
+    //return;
   }
 }
 //-------------------------------------------------------------//
@@ -3075,7 +3076,7 @@ void bypassMode() {
   }
   if (digitalRead(modeAuto) == LOW && digitalRead(modeManual) == LOW) {
     Serial.println(F("Bypass Mode Switch Fault Needs Investigation."));
-    return;
+    //return;
   }
 }
 //-------------------------------------------------------------//
@@ -3407,8 +3408,8 @@ void ledTestCheck() {
 /*****************************************************************************************************************************************/
 void setup() {
 
-   // initialize GDB stub
- //debug_init();
+    //initialize GDB stub
+ debug_init();
 
   /****Serial*****/
 
@@ -3463,7 +3464,7 @@ void setup() {
       Serial.println(F("Initialisation of SD card....failed!"));
       Serial.println();
       sdOk = false;
-      return;
+      //return;
     }
     if (sdOk == true) {
       Serial.println(F("SD Card Initialised.......OK."));
@@ -3578,7 +3579,7 @@ void setup() {
 //LOOP
 /*****************************************************************************************************************************************/
 void loop() {
-
+breakpoint(); //for debugging
 void serialStatusCheck();
   if (bool(initCompleted) == false) {
     bool servoChangeFromTank();
