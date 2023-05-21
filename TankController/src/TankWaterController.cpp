@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <avr8-stub.h>
+//#include <avr8-stub.h>
 #define DMX_USE_PORT0
 /*******Controller**************/
 #include <SD.h>
@@ -3409,7 +3409,7 @@ void ledTestCheck() {
 void setup() {
 
     //initialize GDB stub
- debug_init();
+ //debug_init();
 
   /****Serial*****/
 
@@ -3579,7 +3579,7 @@ void setup() {
 //LOOP
 /*****************************************************************************************************************************************/
 void loop() {
-breakpoint(); //for debugging
+//breakpoint(); //for debugging
 void serialStatusCheck();
   if (bool(initCompleted) == false) {
     bool servoChangeFromTank();
