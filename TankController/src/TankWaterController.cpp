@@ -3418,13 +3418,16 @@ void setup() {
   Serial.println("Serial Monitor Started (Serial0) OK");
   Serial.println();
   Serial1.begin(baud); // HC-12 radio Serial
+  Serial.println("HC-12 (Serial1) Started");
   Serial1.write("AT+DEFAULT");
-  Serial.println("HC-12 Started (Serial1) OK");
-  Serial.println("HC-12 Initialized OK");
+  Serial.println("HC-12 Initialized");
   Serial.println();
   Serial2.begin(baud); // ESP8266 Serial  
-  Serial.println("Web Serial Started (Serial2) OK");
+  Serial.println("Web Serial (Serial2) Started");
   Serial.println();
+  Serial3.begin (baud);
+  Serial3.setTimeout(300);
+  Serial.println("Web Serial Command Functions (Serial3) Started");
   delay (50);
 
   Serial.println(F("========================================"));

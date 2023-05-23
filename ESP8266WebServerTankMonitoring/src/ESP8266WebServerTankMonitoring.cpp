@@ -2226,7 +2226,7 @@ void clientCommandActions(String wsPayload) {
 
  if (wsPayload == "resetCont") {
           Serial.println("Resetting Controller.....");
-          Serial1.printf(wsPayload);
+          Serial1.write(wsPayload);
           break;
  }
   else if (wsPayload == "resetWebServer") {
@@ -2236,7 +2236,7 @@ void clientCommandActions(String wsPayload) {
  }
   else if (wsPayload == "pumpOFF") {
           Serial.println("Turning Off Pump");
-          Serial1.printf(wsPayload);
+          Serial1.write(wsPayload);
           break;
   }
   else if (wsPayload == "refreshPage") {
@@ -2246,12 +2246,12 @@ void clientCommandActions(String wsPayload) {
   }
    else if (wsPayload == "pumpON") {  
           Serial.println("Turning On Pump");
-          Serial1.printf(wsPayload);
+          Serial1.write(wsPayload);
           break;
    }
    else if (wsPayload == "servoPosChange") {
           Serial.println("Changing Servo Position");
-          Serial1.printf(wsPayload);
+          Serial1.write(wsPayload);
           break;
    }
    else {
