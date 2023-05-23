@@ -272,7 +272,29 @@ const uint16_t tankLevelArraySize = 6;
 const char* tankLevelLabels[tankLevelArraySize] = {">= 0 & < 10%", ">= 10 & < 50%", ">= 50 & < 75%", ">= 75 & < 95%", ">= 95%", "\0"};
 
 //----------------- FUNCTIONS---------------------------------------------------//
+void commandBtnActions() {
+  String commandAction="";
+  if (Serial3.available > 0) {
+    commandAction = Serial3.readString();
+    if (commandAction == "resetCont") {
+        Serial.println("Resetting Controller.....");
+    }
+    else if (commandAction == "pumpOFF") {
+        Serial.println("Turning Off Pump");
 
+        break;
+    }
+    else if (commandAction == "pumpON") {
+        Serial.println("Turning On Pump");
+
+        break;
+    }
+    else if (commandAction == servoPosChange){
+        Serial.println("Changing Servo Position");
+
+        break;
+    }
+  }
 //---------------------------------------------------------------------------------
 boolean buzzerOperation() {
   tone(piezoBuzzerPin, 1000, 500);
@@ -3610,5 +3632,6 @@ void serialStatusCheck();
   void modeControl();
   void servoControl();
   void monStatus();
+  void commandBtnActions();
 
 }
