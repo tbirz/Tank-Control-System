@@ -2192,7 +2192,7 @@ void processData() {
  } 
  if (wsPayload.length()> 0) {
   //Serial.print("Length of wsPayload: ") && Serial.println(wsPayload.length());  
-  void clientCommandActions(String);
+  void clientCommandActions(wsPayload);
   //Serial.println();
   //Serial.println(wsPayload);
   //wsPayload="";
@@ -2225,41 +2225,40 @@ void clientCommandActions(String wsPayload) {
 //Serial.println(wsPayload);
 
  if (wsPayload == "resetCont") {
-
           Serial.println("Resetting Controller.....");
+          Serial1.printf(wsPayload);
+          break;
  }
   else if (wsPayload == "resetWebServer") {
-
           Serial.println("Resetting ESP8266 Server.....");
           ESP.restart();
+          break;
  }
   else if (wsPayload == "pumpOFF") {
-
           Serial.println("Turning Off Pump");
-  
+          Serial1.printf(wsPayload);
+          break;
   }
   else if (wsPayload == "refreshPage") {
-
           Serial.println("Refreshing Webpage.....");
+          handleRoot();
+          break;
   }
    else if (wsPayload == "pumpON") {  
-
           Serial.println("Turning On Pump");
-
-   
+          Serial1.printf(wsPayload);
+          break;
    }
    else if (wsPayload == "servoPosChange") {
-
-    Serial.println("Changing Servo Position");
-
+          Serial.println("Changing Servo Position");
+          Serial1.printf(wsPayload);
+          break;
    }
    else {
-      Serial.println (wsPayload);
-      wsPayload="";
-   }
-      
-      }
-
+          Serial.println (wsPayload);
+          wsPayload="";
+   }     
+}
 //--------------------------------------------------------------------------//
 void setup(void){ 
 
