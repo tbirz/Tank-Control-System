@@ -272,7 +272,9 @@ const uint16_t tankLevelArraySize = 6;
 const char* tankLevelLabels[tankLevelArraySize] = {">= 0 & < 10%", ">= 10 & < 50%", ">= 50 & < 75%", ">= 75 & < 95%", ">= 95%", "\0"};
 
 //----------------- FUNCTIONS---------------------------------------------------//
-void commandBtnActions() {
+
+//--------------------------------------------------------------//
+void webCommandBtnActions() {
   String commandAction="";
   if (Serial3.available > 0) {
     commandAction = Serial3.readString();
@@ -281,12 +283,20 @@ void commandBtnActions() {
     }
     else if (commandAction == "pumpOFF") {
         Serial.println("Turning Off Pump");
-
+        digitalWrite(pumpRunning,LOW);
+        digitalWrite(tankLevelOK, HIGH);
+        digitalWrite(tankFilling, LOW);
+        digitalWrite(tankFull, HIGH);
+        digitalWrite(tankEmpty, LOW);
         break;
     }
     else if (commandAction == "pumpON") {
         Serial.println("Turning On Pump");
-
+        digitalWrite(pumpRunning,HIGH);
+        digitalWrite(tankLevelOK, LOW);
+        digitalWrite(tankFilling, HIGH);
+        digitalWrite(tankFull, LOW);
+        digitalWrite(tankEmpty, LOW);
         break;
     }
     else if (commandAction == servoPosChange){
@@ -295,7 +305,7 @@ void commandBtnActions() {
         break;
     }
   }
-//---------------------------------------------------------------------------------
+//--------------------------------------------------------------//
 boolean buzzerOperation() {
   tone(piezoBuzzerPin, 1000, 500);
   delay(1000);
@@ -3200,6 +3210,7 @@ boolean servoChangeFromTank() {
       contIndValue[11] = "y0"; //Servo1 Pos (default)
       servo1Failed = false; //servo1 operation worked
     }
+    
     unsigned long servo2CurrentMillis = millis();
     for (uint16_t angle = ang0; angle < ang90 + 1; angle += servoStepCount) {
       pwm.setPWM(1, 0, angleToPulse(ang90));
@@ -3632,6 +3643,6 @@ void serialStatusCheck();
   void modeControl();
   void servoControl();
   void monStatus();
-  void commandBtnActions();
+  void webCommandBtnActions();
 
 }
