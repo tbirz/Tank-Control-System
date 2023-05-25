@@ -272,7 +272,8 @@ const uint16_t tankLevelArraySize = 6;
 const char* tankLevelLabels[tankLevelArraySize] = {">= 0 & < 10%", ">= 10 & < 50%", ">= 50 & < 75%", ">= 75 & < 95%", ">= 95%", "\0"};
 
 //----------------- FUNCTIONS---------------------------------------------------//
-
+//--------------------------------------------------------------//
+void(* resetFunc) (void) = 0; //for MEGA reset
 //--------------------------------------------------------------//
 void webCommandBtnActions() {
   String commandAction="";
@@ -280,6 +281,8 @@ void webCommandBtnActions() {
     commandAction = Serial3.readString();
     if (commandAction == "resetCont") {
         Serial.println("Resetting Controller.....");
+        delay(500);
+        resetFunc();
     }
     else if (commandAction == "pumpOFF") {
         Serial.println("Turning Off Pump");
@@ -299,12 +302,24 @@ void webCommandBtnActions() {
         digitalWrite(tankEmpty, LOW);
         break;
     }
-    else if (commandAction == servoPosChange){
-        Serial.println("Changing Servo Position");
-
+    else if (commandAction == "servoPosChange"){
+        if (contIndValue(11)== "y0" && contIndValue(12) == "z0") {
+        Serial.print("Current Servo Position is: ") && Serial.println("default");
+          boolean servoChangeToTank();
+          Serial.print("Updated Servo Position is: ") && Serial.println("switched");
         break;
+        }
+        else if(condIntValue(11)=="y1" && contIndValue(12)=="z1") {
+          Serial.print("Current Servo Position is: ") && Serial.println("switched");
+          boolean servoChangeFromTank();
+           Serial.print("Updated Servo Position is: ") && Serial.println("default");
+        break;
+        }
+        else {Serial.println("Servo(s) Fault! - Command Request could Not be completed");
+        }
     }
   }
+}
 //--------------------------------------------------------------//
 boolean buzzerOperation() {
   tone(piezoBuzzerPin, 1000, 500);
