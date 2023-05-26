@@ -556,7 +556,7 @@ $(document).ready(function(){
     }
   
 .navbar {
- height:40px;
+ height:60px;
 }
 
  #rxConsole {
@@ -633,10 +633,10 @@ $(document).ready(function(){
           </thead>
           <tbody>
             <tr id="controlFunctions1" class="d-flex">
-            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnspare1()">spare button</button>  
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectSpare1()">spare button</button>  
             </tr>
             <tr id="controlFunctions2" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectresetWebServer()">Reset WebServer</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetWebServer()">Reset WebServer</button>  
               </tr>
               <tr id="controlFunctions3" class="d-flex">
                 <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOff()">Switch Pump Off</button>
@@ -645,13 +645,13 @@ $(document).ready(function(){
                 <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOn()">Switch Pump On</button>
               </tr>  
             <tr id="controlFunctions5" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectchangeServoPosition()">Change Servo(s) Position</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectChangeServoPosition()">Change Servo(s) Position</button>
             </tr>
             <tr id="controlFunctions6" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnresetController()">Reset Controller</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetController()">Reset Controller</button>
             </tr>
             <tr id="controlFunctions7" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnrefreshPage()">Refresh Page</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectRefreshPage()">Refresh Page</button>  
               </tr>
           </tbody>
         </table>
@@ -1445,7 +1445,7 @@ function socketErrors() {// Log errors
 // Functions for Control Buttons
 //----------------------------------------------------------------------------
 
-function btnSpare1() {
+function btnselectSpare1() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="spare1";
   Socket.send(document.getElementById("txBuff").value);
@@ -1453,7 +1453,7 @@ function btnSpare1() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnresetWebServer() {
+function btnselectResetWebServer() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetWebServer";
   Socket.send(document.getElementById("txBuff").value);
@@ -1461,7 +1461,7 @@ function btnresetWebServer() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnresetController() {
+function btnselectResetController() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetCont";
   Socket.send(document.getElementById("txBuff").value);
@@ -1469,7 +1469,7 @@ function btnresetController() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnchangeServoPosition() {
+function btnselectChangeServoPosition() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="servoPosChange";
   Socket.send(document.getElementById("txBuff").value);
@@ -1493,7 +1493,7 @@ function btnselectPumpOFF() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectrefreshPage() {
+function btnselectRefreshPage() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="refreshPage";
   Socket.send(document.getElementById("txBuff").value);
