@@ -489,6 +489,7 @@ $(document).ready(function(){
       height: 15px;
       width: 15px;
       display: inline-block;
+      align-self: middle;
       align-self: center;
       justify-self: center;
       -webkit-border-radius: 25px;
