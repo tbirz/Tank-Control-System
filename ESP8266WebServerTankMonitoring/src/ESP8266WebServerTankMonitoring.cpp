@@ -1485,7 +1485,7 @@ function btnselectPumpON() {
   document.getElementsById("txBuff")=="";
 }
 }
-funtion btnselectPumpOFF() {
+function btnselectPumpOFF() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpOFF";
   Socket.send(document.getElementById("txBuff").value);
@@ -1493,7 +1493,7 @@ funtion btnselectPumpOFF() {
   document.getElementsById("txBuff")=="";
 }
 }
-funtion btnselectrefreshPage() {
+function btnselectrefreshPage() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="refreshPage";
   Socket.send(document.getElementById("txBuff").value);
