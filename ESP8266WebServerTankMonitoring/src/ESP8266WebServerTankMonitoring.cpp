@@ -489,6 +489,7 @@ $(document).ready(function(){
       height: 15px;
       width: 15px;
       display: inline-block;
+      align-self: middle;
       align-self: center;
       justify-self: center;
       -webkit-border-radius: 25px;
@@ -556,7 +557,7 @@ $(document).ready(function(){
     }
   
 .navbar {
- height:40px;
+ height:60px;
 }
 
  #rxConsole {
@@ -633,10 +634,10 @@ $(document).ready(function(){
           </thead>
           <tbody>
             <tr id="controlFunctions1" class="d-flex">
-            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnspare1()">spare button</button>  
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectSpare1()">spare button</button>  
             </tr>
             <tr id="controlFunctions2" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectresetWebServer()">Reset WebServer</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetWebServer()">Reset WebServer</button>  
               </tr>
               <tr id="controlFunctions3" class="d-flex">
                 <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOff()">Switch Pump Off</button>
@@ -645,13 +646,13 @@ $(document).ready(function(){
                 <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOn()">Switch Pump On</button>
               </tr>  
             <tr id="controlFunctions5" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectchangeServoPosition()">Change Servo(s) Position</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectChangeServoPosition()">Change Servo(s) Position</button>
             </tr>
             <tr id="controlFunctions6" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnresetController()">Reset Controller</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetController()">Reset Controller</button>
             </tr>
             <tr id="controlFunctions7" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnrefreshPage()">Refresh Page</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectRefreshPage()">Refresh Page</button>  
               </tr>
           </tbody>
         </table>
@@ -1445,7 +1446,7 @@ function socketErrors() {// Log errors
 // Functions for Control Buttons
 //----------------------------------------------------------------------------
 
-function btnSpare1() {
+function btnselectSpare1() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="spare1";
   Socket.send(document.getElementById("txBuff").value);
@@ -1453,7 +1454,7 @@ function btnSpare1() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnresetWebServer() {
+function btnselectResetWebServer() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetWebServer";
   Socket.send(document.getElementById("txBuff").value);
@@ -1461,7 +1462,7 @@ function btnresetWebServer() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnresetController() {
+function btnselectResetController() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetCont";
   Socket.send(document.getElementById("txBuff").value);
@@ -1469,7 +1470,7 @@ function btnresetController() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnchangeServoPosition() {
+function btnselectChangeServoPosition() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="servoPosChange";
   Socket.send(document.getElementById("txBuff").value);
@@ -1485,7 +1486,7 @@ function btnselectPumpON() {
   document.getElementsById("txBuff")=="";
 }
 }
-funtion btnselectPumpOFF() {
+function btnselectPumpOFF() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpOFF";
   Socket.send(document.getElementById("txBuff").value);
@@ -1493,7 +1494,7 @@ funtion btnselectPumpOFF() {
   document.getElementsById("txBuff")=="";
 }
 }
-funtion btnselectrefreshPage() {
+function btnselectRefreshPage() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="refreshPage";
   Socket.send(document.getElementById("txBuff").value);
@@ -2192,7 +2193,7 @@ void processData() {
  } 
  if (wsPayload.length()> 0) {
   //Serial.print("Length of wsPayload: ") && Serial.println(wsPayload.length());  
-  void clientCommandActions(String);
+  void clientCommandActions(wsPayload);
   //Serial.println();
   //Serial.println(wsPayload);
   //wsPayload="";
@@ -2225,41 +2226,40 @@ void clientCommandActions(String wsPayload) {
 //Serial.println(wsPayload);
 
  if (wsPayload == "resetCont") {
-
           Serial.println("Resetting Controller.....");
+          Serial1.write(wsPayload);
+          break;
  }
   else if (wsPayload == "resetWebServer") {
-
           Serial.println("Resetting ESP8266 Server.....");
           ESP.restart();
+          break;
  }
   else if (wsPayload == "pumpOFF") {
-
           Serial.println("Turning Off Pump");
-  
+          Serial1.write(wsPayload);
+          break;
   }
   else if (wsPayload == "refreshPage") {
-
           Serial.println("Refreshing Webpage.....");
+          handleRoot();
+          break;
   }
    else if (wsPayload == "pumpON") {  
-
           Serial.println("Turning On Pump");
-
-   
+          Serial1.write(wsPayload);
+          break;
    }
    else if (wsPayload == "servoPosChange") {
-
-    Serial.println("Changing Servo Position");
-
+          Serial.println("Changing Servo Position");
+          Serial1.write(wsPayload);
+          break;
    }
    else {
-      Serial.println (wsPayload);
-      wsPayload="";
-   }
-      
-      }
-
+          Serial.println (wsPayload);
+          wsPayload="";
+   }     
+}
 //--------------------------------------------------------------------------//
 void setup(void){ 
 

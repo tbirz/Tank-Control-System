@@ -272,8 +272,55 @@ const uint16_t tankLevelArraySize = 6;
 const char* tankLevelLabels[tankLevelArraySize] = {">= 0 & < 10%", ">= 10 & < 50%", ">= 50 & < 75%", ">= 75 & < 95%", ">= 95%", "\0"};
 
 //----------------- FUNCTIONS---------------------------------------------------//
-
-//---------------------------------------------------------------------------------
+//--------------------------------------------------------------//
+void(* resetFunc) (void) = 0; //for MEGA reset
+//--------------------------------------------------------------//
+void webCommandBtnActions() {
+  String commandAction="";
+  if (Serial3.available > 0) {
+    commandAction = Serial3.readString();
+    if (commandAction == "resetCont") {
+        Serial.println("Resetting Controller.....");
+        delay(500);
+        resetFunc();
+    }
+    else if (commandAction == "pumpOFF") {
+        Serial.println("Turning Off Pump");
+        digitalWrite(pumpRunning,LOW);
+        digitalWrite(tankLevelOK, HIGH);
+        digitalWrite(tankFilling, LOW);
+        digitalWrite(tankFull, HIGH);
+        digitalWrite(tankEmpty, LOW);
+        break;
+    }
+    else if (commandAction == "pumpON") {
+        Serial.println("Turning On Pump");
+        digitalWrite(pumpRunning,HIGH);
+        digitalWrite(tankLevelOK, LOW);
+        digitalWrite(tankFilling, HIGH);
+        digitalWrite(tankFull, LOW);
+        digitalWrite(tankEmpty, LOW);
+        break;
+    }
+    else if (commandAction == "servoPosChange"){
+        if (contIndValue(11)== "y0" && contIndValue(12) == "z0") {
+        Serial.print("Current Servo Position is: ") && Serial.println("default");
+          boolean servoChangeToTank();
+          Serial.print("Updated Servo Position is: ") && Serial.println("switched");
+        break;
+        }
+        else if(condIntValue(11)=="y1" && contIndValue(12)=="z1") {
+          Serial.print("Current Servo Position is: ") && Serial.println("switched");
+          boolean servoChangeFromTank();
+           Serial.print("Updated Servo Position is: ") && Serial.println("default");
+        break;
+        }
+        else {Serial.println("Servo(s) Fault! - Command Request could Not be completed");
+        }
+    }
+  }
+}
+//--------------------------------------------------------------//
 boolean buzzerOperation() {
   tone(piezoBuzzerPin, 1000, 500);
   delay(1000);
@@ -3178,6 +3225,7 @@ boolean servoChangeFromTank() {
       contIndValue[11] = "y0"; //Servo1 Pos (default)
       servo1Failed = false; //servo1 operation worked
     }
+    
     unsigned long servo2CurrentMillis = millis();
     for (uint16_t angle = ang0; angle < ang90 + 1; angle += servoStepCount) {
       pwm.setPWM(1, 0, angleToPulse(ang90));
@@ -3418,13 +3466,16 @@ void setup() {
   Serial.println("Serial Monitor Started (Serial0) OK");
   Serial.println();
   Serial1.begin(baud); // HC-12 radio Serial
+  Serial.println("HC-12 (Serial1) Started");
   Serial1.write("AT+DEFAULT");
-  Serial.println("HC-12 Started (Serial1) OK");
-  Serial.println("HC-12 Initialized OK");
+  Serial.println("HC-12 Initialized");
   Serial.println();
   Serial2.begin(baud); // ESP8266 Serial  
-  Serial.println("Web Serial Started (Serial2) OK");
+  Serial.println("Web Serial (Serial2) Started");
   Serial.println();
+  Serial3.begin (baud);
+  Serial3.setTimeout(300);
+  Serial.println("Web Serial Command Functions (Serial3) Started");
   delay (50);
 
   Serial.println(F("========================================"));
@@ -3607,5 +3658,6 @@ void serialStatusCheck();
   void modeControl();
   void servoControl();
   void monStatus();
+  void webCommandBtnActions();
 
 }
