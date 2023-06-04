@@ -277,7 +277,7 @@ void(* resetFunc) (void) = 0; //for MEGA reset
 //--------------------------------------------------------------//
 void webCommandBtnActions() {
   String commandAction="";
-  if (Serial3.available > 0) {
+  if (Serial3.available() > 0) {
     commandAction = Serial3.readString();
     if (commandAction == "resetCont") {
         Serial.println("Resetting Controller.....");
@@ -291,7 +291,6 @@ void webCommandBtnActions() {
         digitalWrite(tankFilling, LOW);
         digitalWrite(tankFull, HIGH);
         digitalWrite(tankEmpty, LOW);
-        break;
     }
     else if (commandAction == "pumpON") {
         Serial.println("Turning On Pump");
@@ -300,20 +299,17 @@ void webCommandBtnActions() {
         digitalWrite(tankFilling, HIGH);
         digitalWrite(tankFull, LOW);
         digitalWrite(tankEmpty, LOW);
-        break;
     }
     else if (commandAction == "servoPosChange"){
-        if (contIndValue(11)== "y0" && contIndValue(12) == "z0") {
+        if (contIndValue[11]== "y0" && contIndValue[12] == "z0") {
         Serial.print("Current Servo Position is: ") && Serial.println("default");
           boolean servoChangeToTank();
           Serial.print("Updated Servo Position is: ") && Serial.println("switched");
-        break;
         }
-        else if(condIntValue(11)=="y1" && contIndValue(12)=="z1") {
+        else if(contIndValue[11]=="y1" && contIndValue[12]=="z1") {
           Serial.print("Current Servo Position is: ") && Serial.println("switched");
           boolean servoChangeFromTank();
            Serial.print("Updated Servo Position is: ") && Serial.println("default");
-        break;
         }
         else {Serial.println("Servo(s) Fault! - Command Request could Not be completed");
         }
