@@ -2134,7 +2134,7 @@ void processData() {
   String junk="";
   String overflowMsg="Overflow Occured!";
   delay(250);
-  Serial.swap(); //to rx GPIO13, tx GPIO15
+  Serial.swap(); //to rx GPIO13, tx GPIO15 from tx GPIO1, rx GPIO3 (default)
   delay(250);
   serialSwapped=1;
   if (connCount==1) {
