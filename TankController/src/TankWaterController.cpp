@@ -3466,12 +3466,12 @@ void setup() {
   Serial1.write("AT+DEFAULT");
   Serial.println("HC-12 Initialized");
   Serial.println();
-  Serial2.begin(baud); // ESP8266 Serial  
+  Serial2.begin(baud); // ESP8266 Serial UART0
   Serial.println("Web Serial (Serial2) Started");
   Serial.println();
   Serial3.begin (baud);
   Serial3.setTimeout(300);
-  Serial.println("Web Serial Command Functions (Serial3) Started");
+  Serial.println("Web Serial Command Functions (Serial3) Started"); //ESP8266 Serial UART1 TX only
   delay (50);
 
   Serial.println(F("========================================"));
@@ -3654,6 +3654,6 @@ void serialStatusCheck();
   void modeControl();
   void servoControl();
   void monStatus();
-  void webCommandBtnActions();
+  //void webCommandBtnActions();
 
 }
