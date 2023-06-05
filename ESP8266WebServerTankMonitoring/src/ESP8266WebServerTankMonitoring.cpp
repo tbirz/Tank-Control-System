@@ -2312,7 +2312,7 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   // Uncomment and run it once, if you want to erase all the stored information
   //
   
-  //wifiManager.resetSettings();
+  wifiManager.resetSettings();
    // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
@@ -2321,7 +2321,7 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   //wifiManager.autoConnect(); // use this for auto generated name ESP + ChipID
   bool wifiSetupStatus; // variable to hold the status of the wifi connection
 
-  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","1980premiers"); //specific ap
+  wifiSetupStatus = wifiManager.autoConnect("AutoConnect_ESP8266"); //specific ap
   if (!wifiSetupStatus) {
     Serial.println("Failed to connect");
     ESP.restart();
@@ -2343,9 +2343,11 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
 
 //--------------------------- 
   webSocket.begin();   // start the websocket server
+  Serial.println("WebSocket server begin.");
   webSocket.onEvent(webSocketEvent);
+  Serial.println("WebSocket onEvent passed.");
   webSocket.enableHeartbeat(15000, 3000, 2); // 15 sec ping, 3 sec pong, 2 fails = disconnect
- 
+ Serial.println("WebSocket enableHeartbeat passed."); 
   
   Serial.println("WebSocket server started.");
 
