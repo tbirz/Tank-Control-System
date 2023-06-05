@@ -2193,7 +2193,7 @@ void processData() {
  } 
  if (wsPayload.length()> 0) {
   //Serial.print("Length of wsPayload: ") && Serial.println(wsPayload.length());  
-  void clientCommandActions(wsPayload);
+  void clientCommandActions();
   //Serial.println();
   //Serial.println(wsPayload);
   //wsPayload="";
@@ -2227,33 +2227,27 @@ void clientCommandActions(String wsPayload) {
 
  if (wsPayload == "resetCont") {
           Serial.println("Resetting Controller.....");
-          Serial1.write(wsPayload);
-          break;
+          Serial1.print(wsPayload);
  }
   else if (wsPayload == "resetWebServer") {
           Serial.println("Resetting ESP8266 Server.....");
           ESP.restart();
-          break;
  }
   else if (wsPayload == "pumpOFF") {
           Serial.println("Turning Off Pump");
-          Serial1.write(wsPayload);
-          break;
+          Serial1.print(wsPayload);
   }
   else if (wsPayload == "refreshPage") {
           Serial.println("Refreshing Webpage.....");
           handleRoot();
-          break;
   }
    else if (wsPayload == "pumpON") {  
           Serial.println("Turning On Pump");
-          Serial1.write(wsPayload);
-          break;
+          Serial1.print(wsPayload);
    }
    else if (wsPayload == "servoPosChange") {
           Serial.println("Changing Servo Position");
-          Serial1.write(wsPayload);
-          break;
+          Serial1.print(wsPayload);
    }
    else {
           Serial.println (wsPayload);
@@ -2316,6 +2310,8 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   WiFiManager wifiManager;
   
   // Uncomment and run it once, if you want to erase all the stored information
+  //
+  
   //wifiManager.resetSettings();
    // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
@@ -2325,7 +2321,7 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   //wifiManager.autoConnect(); // use this for auto generated name ESP + ChipID
   bool wifiSetupStatus; // variable to hold the status of the wifi connection
 
-  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","325483"); //specific ap
+  wifiSetupStatus = wifiManager.autoConnect("ESP8266_Wifi_Connect","1980premiers"); //specific ap
   if (!wifiSetupStatus) {
     Serial.println("Failed to connect");
     ESP.restart();
