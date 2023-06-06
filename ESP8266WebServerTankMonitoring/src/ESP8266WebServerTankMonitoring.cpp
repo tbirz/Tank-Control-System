@@ -1,4 +1,4 @@
-#include <WiFiClient.h>
+//#include <WiFiClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
@@ -11,9 +11,9 @@ WebSocketsServer webSocket = WebSocketsServer(81); //webSocket is used to manage
 /*
 //Static IP address configuration for hotspot
 IPAddress ip(192, 168, 99, 117); //ESP static ip
-IPAddress gateway(192, 168, 43, 1);   //IP Address of your WiFi Router (Gateway)
+IPAddress gateway(192, 168, 99, 1);   //IP Address of your WiFi Router (Gateway)
 IPAddress subnet(255, 255, 255, 0);  //Subnet mask
-IPAddress dns(8, 8, 8, 8);  //DNS
+IPAddress dns(192,168,99,1);  //DNS
 
 
 //Enter your Wi-Fi SSID and PASSWORD
@@ -2081,15 +2081,18 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
     // Client has disconnected
     case WStype_DISCONNECTED:
         wsDisconnected = 1; 
+        Serial.println("Websocket Disconnected");
         break;
 
     // New client has connected
     case WStype_CONNECTED:
-        wsConnected = 1;     
+        wsConnected = 1;  
+        Serial.println("Websocket Connected");   
         break;
 
     // Handle text messages from client
     case WStype_TEXT:
+    Serial.println("Websocket Text");
       {  
         // since payload is a pointer we need to type cast to char
        for(int i = 0; i <  maxBuffer; i++) { 
@@ -2134,7 +2137,10 @@ void processData() {
   String junk="";
   String overflowMsg="Overflow Occured!";
   delay(250);
+  Serial.println("pre swap");
   Serial.swap(); //to rx GPIO13, tx GPIO15 from tx GPIO1, rx GPIO3 (default)
+  Serial.println("post swap0");
+  Serial1.println("post swap1");
   delay(250);
   serialSwapped=1;
   if (connCount==1) {
@@ -2257,14 +2263,15 @@ void clientCommandActions(String wsPayload) {
 //--------------------------------------------------------------------------//
 void setup(void){ 
 
+
   String wsPayload="";
     pinMode(2,OUTPUT);
    Serial.begin(baud); //tx GPIO1, rx GPIO3 default
     Serial1.begin(baud); //tx only gpio2 for debugging
 
 /*
-//  int idx=0;
-//int idxCount=0; 
+  int idx=0;
+int idxCount=0; 
 WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
 
   WiFi.hostname(deviceName);      // DHCP Hostname (useful for finding device for static lease)
@@ -2312,7 +2319,7 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   // Uncomment and run it once, if you want to erase all the stored information
   //
   
-  wifiManager.resetSettings();
+  //wifiManager.resetSettings();
    // fetches ssid and pass from eeprom and tries to connect
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
@@ -2324,30 +2331,36 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
   wifiSetupStatus = wifiManager.autoConnect("AutoConnect_ESP8266"); //specific ap
   if (!wifiSetupStatus) {
     Serial.println("Failed to connect");
+    Serial.println("Reset..");
     ESP.restart();
   } 
   else {
     Serial.println("Connected.");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
   }
   delay(500);
-   //while (!Serial){
-   // ;
-    //}
+
+  
+   while (!Serial){
+    ;
+    }
     
 
      server.on("/", handleRoot); // This displays the main webpage, it is called when you open a client connection on the IP address using a browser
+
      server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI 
+
      server.begin();
 
      Serial.println("HTTP server started");
 
 //--------------------------- 
   webSocket.begin();   // start the websocket server
-  Serial.println("WebSocket server begin.");
+
   webSocket.onEvent(webSocketEvent);
-  Serial.println("WebSocket onEvent passed.");
+
   webSocket.enableHeartbeat(15000, 3000, 2); // 15 sec ping, 3 sec pong, 2 fails = disconnect
- Serial.println("WebSocket enableHeartbeat passed."); 
   
   Serial.println("WebSocket server started.");
 
@@ -2358,6 +2371,9 @@ WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration
 void loop(void)
 {
     server.handleClient();  // Keep checking for a client connection
+
     webSocket.loop();
-    processData(); // rx data from controller tx to webpage via websockets   
+
+    processData(); // rx data from controller tx to webpage via websockets  
+   
 }//end LOOP
