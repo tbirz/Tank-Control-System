@@ -959,7 +959,7 @@ function setTxItemStatus() {
 }
    
  function initWebSockets() {
-    Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); 
+    Socket = new WebSocket('ws://192.168.99.117:81/'); 
     Socket.onopen = function(e) {
     Socket.send('Socket Connected @: ' + new Date());  
       wsReadyState();    
@@ -2137,10 +2137,9 @@ void processData() {
   String junk="";
   String overflowMsg="Overflow Occured!";
   delay(250);
-  Serial.println("pre swap");
+
   Serial.swap(); //to rx GPIO13, tx GPIO15 from tx GPIO1, rx GPIO3 (default)
-  Serial.println("post swap0");
-  Serial1.println("post swap1");
+ 
   delay(250);
   serialSwapped=1;
   if (connCount==1) {
