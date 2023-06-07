@@ -634,25 +634,25 @@ $(document).ready(function(){
           </thead>
           <tbody>
             <tr id="controlFunctions1" class="d-flex">
-            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectSpare1()">spare button</button>  
+            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectSpare1()">spare button</button>  
             </tr>
             <tr id="controlFunctions2" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetWebServer()">Reset WebServer</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectResetWebServer()">Reset WebServer</button>  
               </tr>
               <tr id="controlFunctions3" class="d-flex">
-                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOff()">Switch Pump Off</button>
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectPumpOFF()">Switch Pump OFF</button>
               </tr>
               <tr id="controlFunctions4" class="d-flex">
-                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectPumpOn()">Switch Pump On</button>
+                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectPumpON()">Switch Pump ON</button>
               </tr>  
             <tr id="controlFunctions5" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectChangeServoPosition()">Change Servo(s) Position</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectChangeServoPosition()">Change Servo(s) Position</button>
             </tr>
             <tr id="controlFunctions6" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectResetController()">Reset Controller</button>
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectResetController()">Reset Controller</button>
             </tr>
             <tr id="controlFunctions7" class="d-flex">
-              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnselectRefreshPage()">Refresh Page</button>  
+              <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="btnSelectRefreshPage()">Refresh Page</button>  
               </tr>
           </tbody>
         </table>
@@ -959,11 +959,12 @@ function setTxItemStatus() {
 }
    
  function initWebSockets() {
-    Socket = new WebSocket('ws://192.168.99.117:81/'); 
+    Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); 
     Socket.onopen = function(e) {
     Socket.send('Socket Connected @: ' + new Date());  
       wsReadyState();    
     }
+
 }
 
 function socketClose() {
@@ -1446,7 +1447,7 @@ function socketErrors() {// Log errors
 // Functions for Control Buttons
 //----------------------------------------------------------------------------
 
-function btnselectSpare1() {
+function btnSelectSpare1() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="spare1";
   Socket.send(document.getElementById("txBuff").value);
@@ -1454,7 +1455,7 @@ function btnselectSpare1() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectResetWebServer() {
+function btnSelectResetWebServer() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetWebServer";
   Socket.send(document.getElementById("txBuff").value);
@@ -1462,7 +1463,7 @@ function btnselectResetWebServer() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectResetController() {
+function btnSelectResetController() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="resetCont";
   Socket.send(document.getElementById("txBuff").value);
@@ -1470,7 +1471,7 @@ function btnselectResetController() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectChangeServoPosition() {
+function btnSelectChangeServoPosition() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="servoPosChange";
   Socket.send(document.getElementById("txBuff").value);
@@ -1478,7 +1479,7 @@ function btnselectChangeServoPosition() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectPumpON() {
+function btnSelectPumpON() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpON";
   Socket.send(document.getElementById("txBuff").value);
@@ -1486,7 +1487,7 @@ function btnselectPumpON() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectPumpOFF() {
+function btnSelectPumpOFF() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="pumpOFF";
   Socket.send(document.getElementById("txBuff").value);
@@ -1494,7 +1495,7 @@ function btnselectPumpOFF() {
   document.getElementsById("txBuff")=="";
 }
 }
-function btnselectRefreshPage() {
+function btnSelectRefreshPage() {
   if(Socket.readyState==1 && document.getElementById("txBuff").value == "") {
    document.getElementsById("txBuff").value=="refreshPage";
   Socket.send(document.getElementById("txBuff").value);
@@ -2081,7 +2082,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
     // Client has disconnected
     case WStype_DISCONNECTED:
         wsDisconnected = 1; 
-        Serial.println("Websocket Disconnected");
+        Serial.println("Websocket Disconnected....");
         break;
 
     // New client has connected
