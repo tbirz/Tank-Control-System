@@ -961,7 +961,7 @@ function setTxItemStatus() {
  function initWebSockets() {
     Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); 
     Socket.onopen = function(e) {
-    Socket.send('Socket Connected @: ' + new Date());  
+    Socket.send('TEST Socket Connected @: ' + new Date());  
       wsReadyState();    
     }
 
