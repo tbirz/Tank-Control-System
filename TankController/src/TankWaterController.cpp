@@ -3493,22 +3493,29 @@ void setup() {
 
   /****Controller*****/
 
-  void scanI2C(); //scan for I2C devices (SD/RTC & Servo)
+ void scanI2C(); //scan for I2C devices (SD/RTC & Servo)
 
 
  
   if  (rtcSetup() == true)  {
     Serial.println(F("RTC Initialised.......OK."));
     Serial.println();
-
-    if (SD.begin(dataLoggerCS)) {
+  }
+  else {
+    Serial.println(F("RTC Initialisation.......failed!"));
+    Serial.println();
+  }
+  if (SD.begin(dataLoggerCS)) {
       Serial.print("Initialising SD card........");// setup for the SD card
       Serial.println();
       sdOk = true;
-    }
+    Serial.println("Data Logger Setup........");// setup for the SD card
+    Serial.println(sdOk ? "OK" : "Failed");
+  }
     else if (!SD.begin(dataLoggerCS)) {
       Serial.println();
       Serial.println(F("Initialisation of SD card....failed!"));
+      Serial.println("Data Logger Setup........failed");
       Serial.println();
       sdOk = false;
       //return;
@@ -3559,10 +3566,7 @@ void setup() {
       Serial.println();
     }
   }
-   else if (rtcSetup() == false) {
-    Serial.println(F("RTC Initialisation.......failed!"));
-    Serial.println();
-  }
+   
 
 
   // define pwm module inits for servos
@@ -3618,9 +3622,9 @@ void setup() {
 
   void ledTestCheck();
 
-  do {
+ // do {
     //Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
-  } while (rxSensorData() == false);
+ // } while (rxSensorData() == false);
 }
 /*****************************************************************************************************************************************/
 //LOOP
