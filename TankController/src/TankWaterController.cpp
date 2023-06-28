@@ -3492,12 +3492,12 @@ void setup() {
   void showSplash(); //show splash screen
 
   /****Controller*****/
-
+Serial.println("test1");
  void scanI2C(); //scan for I2C devices (SD/RTC & Servo)
-
+Serial.println("test2");
 
  
-  if  (rtcSetup() == true)  {
+  if  (rtcSetup() == true)   {
     Serial.println(F("RTC Initialised.......OK."));
     Serial.println();
   }
@@ -3505,6 +3505,7 @@ void setup() {
     Serial.println(F("RTC Initialisation.......failed!"));
     Serial.println();
   }
+  Serial.println("test3");
   if (SD.begin(dataLoggerCS)) {
       Serial.print("Initialising SD card........");// setup for the SD card
       Serial.println();
@@ -3520,16 +3521,23 @@ void setup() {
       sdOk = false;
       //return;
     }
-    if (sdOk == true) {
+    Serial.println("test4");
+        if (sdOk == true) {
       Serial.println(F("SD Card Initialised.......OK."));
       Serial.println();
       dataFile = SD.open(dataFilename, FILE_WRITE); //open/create file
     }
-    if (SD.exists(dataFilename)) {
+    Serial.println("test5");
+        if (SD.exists(dataFilename)) {
       logFile = true;
       Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" has been found and opened.");
       Serial.println();
-
+    }
+     else {
+      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" cannot be found.");
+      Serial.println();
+    }
+    Serial.println("test6");
       if (dataFile.size() > 0) {
         Serial.print("Data Headings have already been written to the file: ") && Serial.println(dataFilename);
         Serial.println();
@@ -3540,6 +3548,8 @@ void setup() {
       else {
         Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is Empty!");
         Serial.println();
+      }
+      Serial.println("test7");
         if (dataFile) {  // if the file opened ok, write to it:
           Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" is ready for writing to!");
           Serial.println();
@@ -3559,16 +3569,7 @@ void setup() {
           Serial.println();
           dataFile.close();
         }
-      }
-    }
-    else {
-      Serial.print("File: ") && Serial.print(dataFilename) && Serial.println(" cannot be found.");
-      Serial.println();
-    }
-  }
-   
-
-
+      Serial.println("test8");
   // define pwm module inits for servos
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
@@ -3622,9 +3623,9 @@ void setup() {
 
   void ledTestCheck();
 
- // do {
-    //Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
- // } while (rxSensorData() == false);
+  do {
+    Serial.print(" rxActualLevel: ") && Serial.println(rxActualLevel);
+  } while (rxSensorData() == false);
 }
 /*****************************************************************************************************************************************/
 //LOOP
